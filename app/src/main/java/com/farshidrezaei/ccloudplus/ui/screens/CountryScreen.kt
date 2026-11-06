@@ -1,4 +1,4 @@
-package com.farshidrezaei.ccloudplus.ui.viewmodel.screens
+package com.farshidrezaei.ccloudplus.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -70,13 +70,13 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.farshidrezaei.ccloudplus.data.model.FilterType
 import com.farshidrezaei.ccloudplus.data.model.Poster
-import com.farshidrezaei.ccloudplus.ui.viewmodel.country.CountryViewModel
+import com.farshidrezaei.ccloudplus.ui.viewmodel.CountryViewModel
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 
 @Composable
 fun CountryScreen(
-    countryId: Int,
+    countryId: Int = 0,
     viewModel: CountryViewModel = viewModel(),
     navController: NavController? = null
 ) {

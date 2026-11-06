@@ -1,4 +1,4 @@
-package com.farshidrezaei.ccloudplus.ui.viewmodel.screens
+package com.farshidrezaei.ccloudplus.ui.screens
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
@@ -73,7 +73,7 @@ import coil.request.ImageRequest
 import com.farshidrezaei.ccloudplus.R
 import com.farshidrezaei.ccloudplus.data.model.Country
 import com.farshidrezaei.ccloudplus.data.model.Poster
-import com.farshidrezaei.ccloudplus.ui.viewmodel.search.SearchViewModel
+import com.farshidrezaei.ccloudplus.ui.viewmodel.SearchViewModel
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 

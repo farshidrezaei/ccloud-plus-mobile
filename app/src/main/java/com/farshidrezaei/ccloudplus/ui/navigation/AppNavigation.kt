@@ -21,7 +21,14 @@ fun AppNavigation(
         exitTransition = { fadeOut() }
     ) {
         composable(AppScreens.Splash.route) {
-            SplashScreen(navController = navController)
+            SplashScreen(
+                onTimeout = {
+                    navController.navigate(AppScreens.Movies.route) {
+                        popUpTo(AppScreens.Splash.route) { inclusive = true }
+                    }
+                },
+                backgroundColor = com.farshidrezaei.ccloudplus.core.theme.CinevexColors.BackgroundOled
+            )
         }
 
         composable(AppScreens.Movies.route) {

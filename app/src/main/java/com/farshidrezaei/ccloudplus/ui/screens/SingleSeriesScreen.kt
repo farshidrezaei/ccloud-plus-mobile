@@ -1,4 +1,4 @@
-package com.farshidrezaei.ccloudplus.ui.viewmodel.screens
+package com.farshidrezaei.ccloudplus.ui.screens
 
 import android.content.Context
 import android.content.Intent
@@ -73,7 +73,7 @@ import com.farshidrezaei.ccloudplus.data.model.Series
 import com.farshidrezaei.ccloudplus.data.model.Source
 import com.farshidrezaei.ccloudplus.data.model.WatchedEpisode
 import androidx.compose.material.icons.filled.Check
-import com.farshidrezaei.ccloudplus.ui.viewmodel.series.SeasonsViewModel
+import com.farshidrezaei.ccloudplus.ui.viewmodel.SeasonsViewModel
 import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 

@@ -1,4 +1,4 @@
-package com.farshidrezaei.ccloudplus.ui.viewmodel.screens
+package com.farshidrezaei.ccloudplus.ui.screens
 
 import android.content.Context
 import android.content.Intent

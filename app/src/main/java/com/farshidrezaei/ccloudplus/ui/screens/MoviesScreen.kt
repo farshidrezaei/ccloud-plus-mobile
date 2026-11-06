@@ -29,6 +29,7 @@ import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 import com.farshidrezaei.ccloudplus.data.model.Movie
+import com.farshidrezaei.ccloudplus.data.model.toFavoriteItem
 import com.farshidrezaei.ccloudplus.player.VideoPlayerActivity
 import com.farshidrezaei.ccloudplus.ui.components.*
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens

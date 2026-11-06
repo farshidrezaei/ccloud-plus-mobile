@@ -1,4 +1,4 @@
-package com.farshidrezaei.ccloudplus.ui.viewmodel.screens
+package com.farshidrezaei.ccloudplus.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
