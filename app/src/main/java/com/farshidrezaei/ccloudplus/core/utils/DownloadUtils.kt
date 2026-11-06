@@ -3,7 +3,7 @@ package com.farshidrezaei.ccloudplus.core.utils
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.farshidrezaei.ccloudplus.VideoPlayerActivity
+import com.farshidrezaei.ccloudplus.player.VideoPlayerActivity
 
 object DownloadUtils {
     fun openUrl(context: Context, url: String) {

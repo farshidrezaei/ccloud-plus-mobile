@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.Color as ComposeColor
-import com.farshidrezaei.ccloudplus.utils.DeviceUtils
+import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import kotlinx.serialization.Serializable
 
 @Serializable

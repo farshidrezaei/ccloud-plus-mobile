@@ -3,8 +3,8 @@ package com.farshidrezaei.ccloudplus.core.error
 sealed class AppError(
     val messagePersian: String,
     val technicalMessage: String? = null,
-    val cause: Throwable? = null
-) {
+    override val cause: Throwable? = null
+) : Exception(messagePersian, cause) {
     class Network(
         cause: Throwable? = null,
         detail: String? = null

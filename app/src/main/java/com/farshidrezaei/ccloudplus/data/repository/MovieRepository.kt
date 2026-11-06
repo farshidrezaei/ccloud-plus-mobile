@@ -83,41 +83,4 @@ class MovieRepository : BaseRepository() {
             }
         )
     }
-            try {
-                val sourceObj = sourcesArray.getJSONObject(i)
-                sources.add(
-                    Source(
-                        id = sourceObj.optInt("id", 0),
-                        quality = sourceObj.optString("quality", "Unknown"),
-                        type = sourceObj.optString("type", "Unknown"),
-                        url = sourceObj.optString("url", "")
-                    )
-                )
-            } catch (e: Exception) {
-                // Skip sources that fail to parse
-                continue
-            }
-        }
-        return sources
-    }
-    
-    private fun parseCountries(countriesArray: JSONArray): List<Country> {
-        val countries = mutableListOf<Country>()
-        for (i in 0 until countriesArray.length()) {
-            try {
-                val countryObj = countriesArray.getJSONObject(i)
-                countries.add(
-                    Country(
-                        id = countryObj.optInt("id", 0),
-                        title = countryObj.optString("title", "Unknown"),
-                        image = countryObj.optString("image", "")
-                    )
-                )
-            } catch (e: Exception) {
-                // Skip countries that fail to parse
-                continue
-            }
-        }
-        return countries
-    }
 }
