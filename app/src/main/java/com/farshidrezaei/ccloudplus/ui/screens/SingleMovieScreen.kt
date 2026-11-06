@@ -72,6 +72,7 @@ import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
 import com.farshidrezaei.ccloudplus.ui.components.GlassButton
 import androidx.compose.material3.CircularProgressIndicator
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -229,8 +230,8 @@ fun MovieDetailsContent(
                 if (showImageDialog) {
                     AlertDialog(
                         onDismissRequest = { showImageDialog = false },
-                        title = { Text("Image Options") },
-                        text = { Text("Choose an action for this image") },
+                        title = { Text("اقدامات تصویر") },
+                        text = { Text("اقدام مورد نظر رو انتخاب کنید") },
                         confirmButton = {
                             TextButton(
                                 onClick = {
@@ -238,14 +239,14 @@ fun MovieDetailsContent(
                                     showImageDialog = false
                                 }
                             ) {
-                                Text("Copy Image URL")
+                                Text("کپی آدرس تصویر")
                             }
                         },
                         dismissButton = {
                             TextButton(
                                 onClick = { showImageDialog = false }
                             ) {
-                                Text("Cancel")
+                                Text("انصراف")
                             }
                         }
                     )
@@ -284,7 +285,7 @@ fun MovieDetailsContent(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Rating",
+                            contentDescription = "امتیاز",
                             tint = Color.Yellow,
                             modifier = Modifier.size(24.dp)
                         )
@@ -310,7 +311,7 @@ fun MovieDetailsContent(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = "بازگشت",
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -331,8 +332,8 @@ fun MovieDetailsContent(
             if (showRemoveFavoriteDialog) {
                 AlertDialog(
                     onDismissRequest = { showRemoveFavoriteDialog = false },
-                    title = { Text("Remove from Favorites") },
-                    text = { Text("Are you sure you want to remove this movie from your favorites?") },
+                    title = { Text("حذف از علاقه‌مندی‌ها") },
+                    text = { Text("آیا میخواهید از لیست علاقه‌مندی ها حذف شود؟") },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -340,17 +341,17 @@ fun MovieDetailsContent(
                                 isFavorite = false
                                 showRemoveFavoriteDialog = false
                                 // Show toast
-                                android.widget.Toast.makeText(context, "Removed from favorites", android.widget.Toast.LENGTH_SHORT).show()
+                                android.widget.Toast.makeText(context, "حذف از علاقه‌مندی ها", android.widget.Toast.LENGTH_SHORT).show()
                             }
                         ) {
-                            Text("Remove")
+                            Text("حذف")
                         }
                     },
                     dismissButton = {
                         TextButton(
                             onClick = { showRemoveFavoriteDialog = false }
                         ) {
-                            Text("Cancel")
+                            Text("انصراف")
                         }
                     }
                 )
@@ -381,7 +382,7 @@ fun MovieDetailsContent(
                         StorageUtils.saveFavorite(context, favoriteItem)
                         isFavorite = true
                         // Show toast
-                        android.widget.Toast.makeText(context, "Added to favorites", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(context, "افزودن به علاقه‌مندی ها", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier
@@ -390,7 +391,7 @@ fun MovieDetailsContent(
             ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorite",
+                    contentDescription = "علاقه‌مندی",
                     tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -399,7 +400,7 @@ fun MovieDetailsContent(
         // Genres
         if (movie.genres.isNotEmpty()) {
             Text(
-                text = "Genres",
+                text = "ژانرها",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,

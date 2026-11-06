@@ -117,8 +117,8 @@ fun FavoritesScreen(navController: NavController) {
     if (showDeleteAllDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteAllDialog = false },
-            title = { Text("Delete All Favorites") },
-            text = { Text("Are you sure you want to delete all favorites? This action cannot be undone.") },
+            title = { Text("حذف تمام علاقه‌مندی ها") },
+            text = { Text("آیا از حذف تمامی علاقه‌مندی ها اطمینان دارید؟ این اقدام قابل بازگشت نیست.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -126,17 +126,17 @@ fun FavoritesScreen(navController: NavController) {
                         favorites = emptyList()
                         showDeleteAllDialog = false
                         // Show toast
-                        android.widget.Toast.makeText(context, "All favorites deleted", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(context, "تمامی علاقه‌مندی ها حذف شد.", android.widget.Toast.LENGTH_SHORT).show()
                     }
                 ) {
-                    Text("Delete")
+                    Text("حذف")
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteAllDialog = false }
                 ) {
-                    Text("Cancel")
+                    Text("انصراف")
                 }
             }
         )
@@ -148,12 +148,12 @@ fun FavoritesScreen(navController: NavController) {
         
         AlertDialog(
             onDismissRequest = { showCreateGroupDialog = false },
-            title = { Text("Create New Playlist") },
+            title = { Text("ساخت لیست پخش جدید") },
             text = {
                 OutlinedTextField(
                     value = groupName,
                     onValueChange = { groupName = it },
-                    label = { Text("Playlist Name") },
+                    label = { Text("نام لیست پخش") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true, // Prevent new lines
                     keyboardOptions = KeyboardOptions(
@@ -773,7 +773,7 @@ fun FavoritesScreen(navController: NavController) {
                 val gridColumns = remember(isTv) {
                     if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
                 }
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -178,7 +178,7 @@ fun AboutScreen(navController: NavController?) {
             
             // Copyright
             Text(
-                text = "© ${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)} CCloud. All rights reserved.",
+                text = "© ${java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)} CCloud. تمامی حقوق محفوظ است.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -255,12 +255,12 @@ fun getArchitecture(): String {
                 "armeabi-v7a" -> "ARM32 (armeabi-v7a)"
                 "x86_64" -> "x86_64"
                 "x86" -> "x86"
-                else -> "${supportedAbis[0]} (Unknown)"
+                else -> "${supportedAbis[0]} (نامشخص)"
             }
         } else {
-            "Unknown"
+            "نامشخص"
         }
     } catch (e: Exception) {
-        "Unknown"
+        "نامشخص"
     }
 }

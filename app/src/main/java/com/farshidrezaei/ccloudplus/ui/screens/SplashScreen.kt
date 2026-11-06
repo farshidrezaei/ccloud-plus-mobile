@@ -87,7 +87,7 @@ fun SplashScreen(
                     .data(R.drawable.splash_logo)
                     .crossfade(true)
                     .build(),
-                contentDescription = "App Logo",
+                contentDescription = "لوگو",
                 modifier = Modifier.size(120.dp)
             )
             
@@ -105,7 +105,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(8.dp))
             
             Text(
-                text = "Version ${BuildConfig.VERSION_NAME ?: "1.0"}",
+                text = "نسخه ${BuildConfig.VERSION_NAME ?: "1.0"}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -114,7 +114,7 @@ fun SplashScreen(
             Spacer(modifier = Modifier.height(4.dp))
             
             Text(
-                text = "Developed by Hossein Pira",
+                text = "توسعه توسط Farshid Rezaei",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -132,10 +132,10 @@ fun WelcomeSliderScreen(
 ) {
     // Welcome slides data
     val slides = listOf(
-        SlideData(R.drawable.s1, "Welcome to CCloud"),
-        SlideData(R.drawable.s2, "Free & Fast"),
-        SlideData(R.drawable.s3, "No Login Required"),
-        SlideData(R.drawable.s4, "For Iranian Users")
+        SlideData(R.drawable.s1, "خوش آمدید"),
+        SlideData(R.drawable.s2, "سریع و رایگان"),
+        SlideData(R.drawable.s3, "بدون نیاز به ورود"),
+        SlideData(R.drawable.s4, "برای کاربران ایرانی")
     )
     
     Box(

@@ -79,6 +79,7 @@ import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
 import com.farshidrezaei.ccloudplus.ui.components.GlassButton
 import androidx.compose.material3.CircularProgressIndicator
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -243,14 +244,14 @@ fun SourceOptionsDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Episode: ${episode.title}",
+                text = "اپیزود: ${episode.title}",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
         },
         text = {
             Text(
-                text = "Choose quality to play",
+                text = "کیفیت را جهت پخش انتخاب کنید",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -270,11 +271,11 @@ fun SourceOptionsDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
-                            contentDescription = "Play",
+                            contentDescription = "پخش",
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Play ${source.quality}")
+                        Text("پخش ${source.quality}")
                     }
                 }
                 
@@ -284,7 +285,7 @@ fun SourceOptionsDialog(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Cancel")
+                    Text("انصراف")
                 }
             }
         },
@@ -337,14 +338,14 @@ fun DownloadMenu(
             onDismissRequest = onDismiss,
             title = {
                 Text(
-                    text = "Select Quality to Download",
+                    text = "انتخب کیفیت جهت دانلود",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Choose a quality option for download",
+                    text = "کیفیت را جهت دانلود انتخاب کنید",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -370,7 +371,7 @@ fun DownloadMenu(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Download,
-                                contentDescription = "Download",
+                                contentDescription = "دانلود",
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -384,7 +385,7 @@ fun DownloadMenu(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Cancel")
+                        Text("انصراف")
                     }
                 }
             },
@@ -480,8 +481,8 @@ fun SeriesDetailsContent(
                     if (showImageDialog) {
                         AlertDialog(
                             onDismissRequest = { showImageDialog = false },
-                            title = { Text("Image Options") },
-                            text = { Text("Choose an action for this image") },
+                            title = { Text("اقدامات تصویر") },
+                            text = { Text("اقدام مربوط به تصویر را انتخاب کنید") },
                             confirmButton = {
                                 TextButton(
                                     onClick = {
@@ -489,14 +490,14 @@ fun SeriesDetailsContent(
                                         showImageDialog = false
                                     }
                                 ) {
-                                    Text("Copy Image URL")
+                                    Text("کپی آدرس تصویر")
                                 }
                             },
                             dismissButton = {
                                 TextButton(
                                     onClick = { showImageDialog = false }
                                 ) {
-                                    Text("Cancel")
+                                    Text("انصراف")
                                 }
                             }
                         )

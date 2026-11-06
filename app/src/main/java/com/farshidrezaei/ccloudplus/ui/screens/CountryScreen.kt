@@ -139,21 +139,21 @@ fun CountryScreen(
                     onDismissRequest = { filterMenuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Default") },
+                        text = { Text("پیشفرض") },
                         onClick = {
                             viewModel.selectFilterType(FilterType.DEFAULT)
                             filterMenuExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("By Year") },
+                        text = { Text("سال ساخت") },
                         onClick = {
                             viewModel.selectFilterType(FilterType.BY_YEAR)
                             filterMenuExpanded = false
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("By IMDB") },
+                        text = { Text("امتیاز IMDB") },
                         onClick = {
                             viewModel.selectFilterType(FilterType.BY_IMDB)
                             filterMenuExpanded = false
@@ -174,8 +174,8 @@ fun CountryScreen(
                 Text(
                     text = when (selectedFilterType) {
                         FilterType.DEFAULT -> ""
-                        FilterType.BY_YEAR -> "Sorted by Year"
-                        FilterType.BY_IMDB -> "Sorted by IMDB"
+                        FilterType.BY_YEAR -> "مرتب شده با سال ساخت"
+                        FilterType.BY_IMDB -> "مرتب شده با امیتاز IMDB"
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary
@@ -222,7 +222,7 @@ fun CountryLoadingScreen() {
     ) {
         // Add a title while loading
         Text(
-            text = "Loading Content...",
+            text = "در حال بارگیری...",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(16.dp),

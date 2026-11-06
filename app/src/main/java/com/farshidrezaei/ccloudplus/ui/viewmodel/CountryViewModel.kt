@@ -63,9 +63,9 @@ class CountryViewModel : ViewModel() {
             try {
                 val countries = countryRepository.getAllCountries()
                 val country = countries.find { it.id == countryId }
-                countryName = country?.title ?: "Country"
+                countryName = country?.title ?: "کشور"
             } catch (e: Exception) {
-                countryName = "Country"
+                countryName = "کشور"
             }
         }
     }
