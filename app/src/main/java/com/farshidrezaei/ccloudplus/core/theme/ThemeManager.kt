@@ -1,54 +1,36 @@
 package com.farshidrezaei.ccloudplus.core.theme
 
 import android.content.Context
-import android.content.SharedPreferences
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.core.content.edit
+import androidx.compose.runtime.setValue
 
-class ThemeManager(private val context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("theme_prefs", Context.MODE_PRIVATE)
-    
-    fun saveThemeSettings(settings: ThemeSettings) {
-        prefs.edit {
-            putString("theme_mode", settings.themeMode.name)
-            putInt("primary_color", settings.primaryColor.toArgb())
-            // Removed secondary_color as it's no longer used
-        }
-    }
-    
-    fun loadThemeSettings(): ThemeSettings {
-        val themeModeStr = prefs.getString("theme_mode", ThemeMode.SYSTEM.name) ?: ThemeMode.SYSTEM.name
-        val themeMode = try {
-            ThemeMode.valueOf(themeModeStr)
-        } catch (e: IllegalArgumentException) {
-            ThemeMode.SYSTEM
-        }
-        
-        val primaryColor = prefs.getInt("primary_color", defaultPrimaryColor.toArgb())
-        // Removed secondary_color as it's no longer used
-        
-        return ThemeSettings(
-            themeMode = themeMode,
-            primaryColor = Color(primaryColor)
-            // Removed secondaryColor as it's no longer used
-        )
-    }
+enum class AppThemeMode(val titleFa: String) {
+    SYSTEM("پیش‌فرض سیستم"),
+    DARK("حالت تیره (OLED)"),
+    LIGHT("حالت روشن")
 }
 
-@Composable
-fun rememberThemeManager(): ThemeManager {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    return remember { ThemeManager(context) }
-}
+object ThemeManager {
+    private const val PREFS_NAME = "ccloud_theme_prefs"
+    private const val KEY_THEME_MODE = "theme_mode"
 
-@Composable
-fun rememberAppThemeSettings(): MutableState<ThemeSettings> {
-    val themeManager = rememberThemeManager()
-    val settings = remember { mutableStateOf(themeManager.loadThemeSettings()) }
-    return settings
+    var currentThemeMode by mutableStateOf(AppThemeMode.SYSTEM)
+        private set
+
+    fun initialize(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val savedName = prefs.getString(KEY_THEME_MODE, AppThemeMode.SYSTEM.name)
+        currentThemeMode = try {
+            AppThemeMode.valueOf(savedName ?: AppThemeMode.SYSTEM.name)
+        } catch (e: Exception) {
+            AppThemeMode.SYSTEM
+        }
+    }
+
+    fun setThemeMode(context: Context, mode: AppThemeMode) {
+        currentThemeMode = mode
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_THEME_MODE, mode.name).apply()
+    }
 }

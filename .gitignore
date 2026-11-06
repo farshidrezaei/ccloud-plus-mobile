@@ -11,4 +11,5 @@
 local.properties
 key.properties
 *.jks
+!app/ccloud_release.jks
 *.keystore

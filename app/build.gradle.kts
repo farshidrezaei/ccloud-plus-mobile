@@ -18,8 +18,8 @@ android {
         // Android 7.0 (API 23) and earlier are not supported
         minSdk = 24
         targetSdk = 36
-        versionCode = 21
-        versionName = "2.0.0"
+        versionCode = 20001
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         
@@ -34,16 +34,10 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePropertiesFile = rootProject.file("key.properties")
-            val keystoreProperties = Properties()
-            if (keystorePropertiesFile.exists()) {
-                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-            }
-            
-            keyAlias = keystoreProperties.getProperty("keyAlias") ?: ""
-            keyPassword = keystoreProperties.getProperty("keyPassword") ?: ""
-            storeFile = file(keystoreProperties.getProperty("storeFile") ?: "keystore.jks")
-            storePassword = keystoreProperties.getProperty("storePassword") ?: ""
+            keyAlias = "ccloud"
+            keyPassword = "ccloudplus123"
+            storeFile = file("ccloud_release.jks")
+            storePassword = "ccloudplus123"
         }
     }
 
@@ -51,18 +45,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            // Move keystoreProperties declaration to correct scope
-            val keystorePropertiesFile = rootProject.file("key.properties")
-            val keystoreProperties = Properties()
-            if (keystorePropertiesFile.exists()) {
-                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-            }
-            val storeFilePath = keystoreProperties.getProperty("storeFile") ?: "keystore/debug.keystore"
-            signingConfig = if (file(storeFilePath).exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -16,10 +16,14 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppScreens.Movies.route,
+        startDestination = AppScreens.Home.route,
         enterTransition = { fadeIn() },
         exitTransition = { fadeOut() }
     ) {
+        composable(AppScreens.Home.route) {
+            HomeScreen(navController = navController)
+        }
+
         composable(AppScreens.Movies.route) {
             MoviesScreen(navController = navController)
         }

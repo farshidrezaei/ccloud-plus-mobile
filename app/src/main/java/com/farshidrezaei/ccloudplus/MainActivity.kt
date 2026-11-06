@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -18,7 +19,9 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.AppThemeMode
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.ThemeManager
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.ui.navigation.AppNavigation
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
@@ -51,15 +54,21 @@ fun MainApp() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
+    val isDark = when (ThemeManager.currentThemeMode) {
+        AppThemeMode.SYSTEM -> isSystemInDarkTheme()
+        AppThemeMode.DARK -> true
+        AppThemeMode.LIGHT -> false
+    }
+
     val systemUiController = rememberSystemUiController()
-    LaunchedEffect(Unit) {
+    LaunchedEffect(isDark) {
         systemUiController.setStatusBarColor(
             color = Color.Transparent,
-            darkIcons = false
+            darkIcons = !isDark
         )
         systemUiController.setNavigationBarColor(
             color = Color.Transparent,
-            darkIcons = false
+            darkIcons = !isDark
         )
     }
 
@@ -71,7 +80,8 @@ fun MainApp() {
             currentRoute == "favorites" -> AppScreens.Favorites
             currentRoute == "about" -> AppScreens.About
             currentRoute == "downloads" -> AppScreens.Downloads
-            else -> AppScreens.navigationItems.find { it.route == currentRoute } ?: AppScreens.Movies
+            currentRoute == "settings" -> AppScreens.Settings
+            else -> AppScreens.navigationItems.find { it.route == currentRoute } ?: AppScreens.Home
         }
     }
 
@@ -80,20 +90,25 @@ fun MainApp() {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(CinevexColors.BackgroundOled)
+                .background(if (isDark) CCloudColors.BackgroundOled else CCloudColors.BackgroundLight)
         ) {
             if (isTv) {
                 Row(modifier = Modifier.fillMaxSize()) {
                     if (currentScreen.showSidebar) {
                         GlassSidebarNavigation(navController = navController)
                     }
-                    Box(modifier = Modifier.weight(1f)) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .statusBarsPadding()
+                            .navigationBarsPadding()
+                    ) {
                         AppNavigation(navController = navController)
                     }
                 }
             } else {
                 Scaffold(
-                    containerColor = CinevexColors.BackgroundOled,
+                    containerColor = if (isDark) CCloudColors.BackgroundOled else CCloudColors.BackgroundLight,
                     contentWindowInsets = WindowInsets.statusBars,
                     bottomBar = {
                         if (currentScreen.showBottomBar) {

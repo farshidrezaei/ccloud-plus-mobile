@@ -606,4 +606,74 @@ object StorageUtils {
             Log.e(TAG, "Error clearing all watched episodes", e)
         }
     }
+
+    // Continue Watching Functions
+    fun savePlaybackPosition(
+        context: Context,
+        id: Int,
+        type: String,
+        title: String,
+        poster: String,
+        videoUrl: String,
+        positionMs: Long,
+        durationMs: Long,
+        seriesId: Int = 0,
+        seasonId: Int = 0,
+        episodeId: Int = 0
+    ) {
+        if (durationMs <= 0 || positionMs < 5000) return
+        // If finished > 95%, remove from continue watching
+        if (positionMs.toFloat() / durationMs.toFloat() >= 0.95f) {
+            removeContinueWatching(context, id, type)
+            return
+        }
+
+        try {
+            val items = getContinueWatchingList(context).toMutableList()
+            items.removeAll { it.id == id && it.type == type }
+            val item = com.farshidrezaei.ccloudplus.data.model.ContinueWatchingItem(
+                id = id,
+                type = type,
+                title = title,
+                poster = poster,
+                videoUrl = videoUrl,
+                positionMs = positionMs,
+                durationMs = durationMs,
+                seriesId = seriesId,
+                seasonId = seasonId,
+                episodeId = episodeId,
+                timestamp = System.currentTimeMillis()
+            )
+            items.add(0, item)
+            val jsonString = Json.encodeToString(items.take(20))
+            File(context.filesDir, "continue_watching.json").writeText(jsonString)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving continue watching", e)
+        }
+    }
+
+    fun getContinueWatchingList(context: Context): List<com.farshidrezaei.ccloudplus.data.model.ContinueWatchingItem> {
+        return try {
+            val file = File(context.filesDir, "continue_watching.json")
+            if (file.exists()) {
+                val jsonString = file.readText()
+                Json.decodeFromString<List<com.farshidrezaei.ccloudplus.data.model.ContinueWatchingItem>>(jsonString)
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun removeContinueWatching(context: Context, id: Int, type: String) {
+        try {
+            val items = getContinueWatchingList(context).toMutableList()
+            items.removeAll { it.id == id && it.type == type }
+            val jsonString = Json.encodeToString(items)
+            File(context.filesDir, "continue_watching.json").writeText(jsonString)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error removing continue watching", e)
+        }
+    }
 }

@@ -1,6 +1,5 @@
 package com.farshidrezaei.ccloudplus.ui.screens
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,19 +19,18 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
-import com.farshidrezaei.ccloudplus.data.model.Movie
 import com.farshidrezaei.ccloudplus.data.model.Series
-import com.farshidrezaei.ccloudplus.data.model.toFavoriteItem
+import com.farshidrezaei.ccloudplus.data.model.toMovie
 import com.farshidrezaei.ccloudplus.ui.components.*
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.ui.viewmodel.SeriesViewModel
@@ -47,29 +45,29 @@ fun SeriesScreen(
     val isTv = remember { DeviceUtils.isTv(context) }
 
     val seriesList = viewModel.seriesList
-    val featuredSeries = viewModel.featuredItems
     val isLoading = viewModel.isLoading
     val isLoadingMore = viewModel.isLoadingMore
     val error = viewModel.error
     val genres = viewModel.genres
     val selectedGenreId = viewModel.selectedGenreId
 
-    var previewSeries by remember { mutableStateOf<Series?>(null) }
+    var selectedSeriesForAction by remember { mutableStateOf<Series?>(null) }
     var showFilterSheet by remember { mutableStateOf(false) }
 
+    // 3 columns on mobile, 6 columns on TV (matches Image 3 benchmark)
     val gridColumns = remember(isTv) {
-        if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
+        if (isTv) GridCells.Fixed(6) else GridCells.Fixed(3)
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
+            .background(CCloudColors.BackgroundOled)
     ) {
         when {
             isLoading && seriesList.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = CinevexColors.AccentRed)
+                    CircularProgressIndicator(color = CCloudColors.AccentRed)
                 }
             }
             error != null && seriesList.isEmpty() -> {
@@ -87,175 +85,161 @@ fun SeriesScreen(
                     LazyVerticalGrid(
                         columns = gridColumns,
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            top = 16.dp,
-                            bottom = if (isTv) 24.dp else 90.dp
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 12.dp,
+                            bottom = if (isTv) 24.dp else 96.dp
                         ),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        // 1. Featured Hero Carousel
-                        if (featuredSeries.isNotEmpty()) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                FeaturedHeroCarousel(
-                                    featuredItems = featuredSeries,
-                                    onPlayClick = { movie ->
-                                        seriesList.find { it.id == movie.id }?.let { StorageUtils.saveSeriesToFile(context, it) }
-                                        navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                                    },
-                                    onDetailsClick = { movie ->
-                                        seriesList.find { it.id == movie.id }?.let { StorageUtils.saveSeriesToFile(context, it) }
-                                        navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                                    },
-                                    modifier = Modifier.padding(bottom = 8.dp)
-                                )
-                            }
-                        }
-
-                    // 2. Genre Chips & Filter Row
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            GlassBox(
-                                shape = RoundedCornerShape(12.dp),
-                                backgroundColor = CinevexColors.GlassSurfaceElevated,
-                                onClick = { showFilterSheet = true },
-                                modifier = Modifier.size(42.dp)
-                            ) {
-                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = Icons.Default.FilterList,
-                                        contentDescription = "فیلتر",
-                                        tint = if (viewModel.advancedFilter.minImdb > 0f) CinevexColors.AccentRed else Color.White,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.width(10.dp))
-
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                item {
-                                    val isAllSelected = selectedGenreId == 0
-                                    GlassBox(
-                                        shape = RoundedCornerShape(12.dp),
-                                        backgroundColor = if (isAllSelected) CinevexColors.AccentRed else CinevexColors.GlassSurface,
-                                        borderColor = if (isAllSelected) CinevexColors.AccentRed else CinevexColors.GlassBorder,
-                                        onClick = { viewModel.selectGenre(0) },
-                                        enableDpadFocus = isTv
-                                    ) {
-                                        Text(
-                                            text = "همه",
-                                            style = CinevexTypography.LabelSmall,
-                                            color = if (isAllSelected) Color.White else CinevexColors.TextSecondary,
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                                        )
-                                    }
-                                }
-
-                                items(genres) { genre ->
-                                    val isSelected = selectedGenreId == genre.id
-                                    GlassBox(
-                                        shape = RoundedCornerShape(12.dp),
-                                        backgroundColor = if (isSelected) CinevexColors.AccentRed else CinevexColors.GlassSurface,
-                                        borderColor = if (isSelected) CinevexColors.AccentRed else CinevexColors.GlassBorder,
-                                        onClick = { viewModel.selectGenre(genre.id) },
-                                        enableDpadFocus = isTv
-                                    ) {
-                                        Text(
-                                            text = genre.title,
-                                            style = CinevexTypography.LabelSmall,
-                                            color = if (isSelected) Color.White else CinevexColors.TextSecondary,
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // 3. Grid of Series Posters
-                    itemsIndexed(seriesList) { index, series ->
-                        if (index >= seriesList.size - 4 && !isLoadingMore && viewModel.canLoadMore) {
-                            LaunchedEffect(Unit) {
-                                viewModel.loadMore()
-                            }
-                        }
-
-                        MediaCard(
-                            movie = series.toMovie(),
-                            onClick = {
-                                StorageUtils.saveSeriesToFile(context, series)
-                                navController.navigate(AppScreens.SingleSeries.createRoute(series.id))
-                            },
-                            onLongClick = {
-                                previewSeries = series
-                            }
-                        )
-                    }
-
-                    // 4. Loading More
-                    if (isLoadingMore) {
+                        // 1. Header Title
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                CircularProgressIndicator(
-                                    color = CinevexColors.AccentRed,
-                                    modifier = Modifier.size(32.dp)
+                                Text(
+                                    text = "سریال‌ها",
+                                    style = CCloudTypography.TitleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = CCloudColors.TextPrimary
                                 )
+                            }
+                        }
+
+                        // 2. Genre Chips & Filter Row (Full span)
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Filter Button
+                                GlassBox(
+                                    shape = RoundedCornerShape(12.dp),
+                                    backgroundColor = CCloudColors.GlassSurfaceElevated,
+                                    onClick = { showFilterSheet = true },
+                                    modifier = Modifier.size(38.dp)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Icon(
+                                            imageVector = Icons.Default.FilterList,
+                                            contentDescription = "فیلتر",
+                                            tint = if (viewModel.advancedFilter.minImdb > 0f) CCloudColors.AccentRed else Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                // Genre list
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    item {
+                                        val isAllSelected = selectedGenreId == 0
+                                        GlassBox(
+                                            shape = RoundedCornerShape(12.dp),
+                                            backgroundColor = if (isAllSelected) CCloudColors.AccentRed else CCloudColors.GlassSurface,
+                                            borderColor = if (isAllSelected) CCloudColors.AccentRed else CCloudColors.GlassBorder,
+                                            onClick = { viewModel.selectGenre(0) },
+                                            enableDpadFocus = isTv
+                                        ) {
+                                            Text(
+                                                text = "همه",
+                                                style = CCloudTypography.LabelSmall,
+                                                color = if (isAllSelected) Color.White else CCloudColors.TextSecondary,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                                            )
+                                        }
+                                    }
+
+                                    items(genres) { genre ->
+                                        val isSelected = selectedGenreId == genre.id
+                                        GlassBox(
+                                            shape = RoundedCornerShape(12.dp),
+                                            backgroundColor = if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassSurface,
+                                            borderColor = if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassBorder,
+                                            onClick = { viewModel.selectGenre(genre.id) },
+                                            enableDpadFocus = isTv
+                                        ) {
+                                            Text(
+                                                text = genre.title,
+                                                style = CCloudTypography.LabelSmall,
+                                                color = if (isSelected) Color.White else CCloudColors.TextSecondary,
+                                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // 3. Grid of Series Posters (3-column on mobile)
+                        itemsIndexed(seriesList) { index, series ->
+                            if (index >= seriesList.size - 4 && !isLoadingMore && viewModel.canLoadMore) {
+                                LaunchedEffect(Unit) {
+                                    viewModel.loadMore()
+                                }
+                            }
+
+                            MediaCard(
+                                movie = series.toMovie(),
+                                onClick = {
+                                    StorageUtils.saveSeriesToFile(context, series)
+                                    navController.navigate(AppScreens.SingleSeries.createRoute(series.id))
+                                },
+                                onLongClick = {
+                                    selectedSeriesForAction = series
+                                }
+                            )
+                        }
+
+                        // 4. Loading More Spinner
+                        if (isLoadingMore) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        color = CCloudColors.AccentRed,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
         }
-    }
 
-        // Preview BottomSheet
-        if (previewSeries != null) {
-            MediaPreviewModal(
-                movie = previewSeries?.toMovie(),
-                onDismiss = { previewSeries = null },
-                onPlayClick = { movie ->
-                    previewSeries?.let { StorageUtils.saveSeriesToFile(context, it) }
-                    navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                },
-                onDetailsClick = { movie ->
-                    previewSeries?.let { StorageUtils.saveSeriesToFile(context, it) }
-                    navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                },
-                onToggleFavorite = { _ ->
-                    previewSeries?.let { series ->
-                        val favItem = series.toFavoriteItem()
-                        if (StorageUtils.isFavorite(context, series.id, "series")) {
-                            StorageUtils.removeFavorite(context, series.id, "series")
-                        } else {
-                            StorageUtils.saveFavorite(context, favItem)
-                        }
-                    }
-                },
-                isFavorite = StorageUtils.isFavorite(context, previewSeries?.id ?: 0, "series")
+        // Quick Action Bottom Sheet
+        selectedSeriesForAction?.let { series ->
+            MediaActionSheet(
+                item = series,
+                mediaType = "series",
+                onDismiss = { selectedSeriesForAction = null }
             )
         }
 
-        // Advanced Filter
+        // Advanced Filter Bottom Sheet
         if (showFilterSheet) {
             AdvancedFilterSheet(
                 initialFilter = viewModel.advancedFilter,
-                onApply = { newFilter -> viewModel.applyAdvancedFilter(newFilter) },
+                onApply = { newFilter ->
+                    viewModel.applyAdvancedFilter(newFilter)
+                    showFilterSheet = false
+                },
                 onDismiss = { showFilterSheet = false }
             )
         }

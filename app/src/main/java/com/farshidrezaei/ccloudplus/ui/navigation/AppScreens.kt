@@ -20,6 +20,12 @@ sealed class AppScreens(
         showSidebar = false
     )
 
+    data object Home : AppScreens(
+        route = "home",
+        resourceId = R.string.home,
+        icon = Icons.Default.Home
+    )
+
     data object Movies : AppScreens(
         route = "movies",
         resourceId = R.string.movies,
@@ -42,20 +48,24 @@ sealed class AppScreens(
         route = "favorites",
         resourceId = R.string.favorites,
         icon = Icons.Default.Favorite,
-        showBottomBar = false,
-        showSidebar = false
+        showBottomBar = true,
+        showSidebar = true
     )
 
     data object Downloads : AppScreens(
         route = "downloads",
         resourceId = R.string.downloads,
-        icon = Icons.Default.Download
+        icon = Icons.Default.Download,
+        showBottomBar = false,
+        showSidebar = false
     )
 
     data object Settings : AppScreens(
         route = "settings",
         resourceId = R.string.settings,
-        icon = Icons.Default.Settings
+        icon = Icons.Default.Settings,
+        showBottomBar = false,
+        showSidebar = false
     )
 
     data object SingleMovie : AppScreens(
@@ -94,11 +104,11 @@ sealed class AppScreens(
 
     companion object {
         val navigationItems = listOf(
+            Home,
             Movies,
             Series,
             Search,
-            Downloads,
-            Settings
+            Favorites
         )
     }
 }

@@ -1,810 +1,269 @@
 package com.farshidrezaei.ccloudplus.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.farshidrezaei.ccloudplus.R
-import com.farshidrezaei.ccloudplus.data.model.FavoriteGroup
-import com.farshidrezaei.ccloudplus.data.model.FavoriteItem
-import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
-import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import coil.compose.AsyncImage
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.data.model.FavoriteItem
 import com.farshidrezaei.ccloudplus.data.model.toMovie
 import com.farshidrezaei.ccloudplus.data.model.toSeries
-import com.farshidrezaei.ccloudplus.ui.components.MediaCard
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import java.util.UUID
+import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 
-@OptIn(ExperimentalMaterial3Api::class)
+private enum class FavoriteTab(val title: String) {
+    ALL("همه"),
+    MOVIES("فیلم‌ها"),
+    SERIES("سریال‌ها")
+}
+
 @Composable
 fun FavoritesScreen(navController: NavController) {
-    var favorites by remember { mutableStateOf<List<FavoriteItem>>(emptyList()) }
-    var groups by remember { mutableStateOf<List<FavoriteGroup>>(emptyList()) }
-    var selectedGroup by remember { mutableStateOf<FavoriteGroup?>(null) }
     val context = LocalContext.current
-    var showDeleteAllDialog by remember { mutableStateOf(false) }
-    var showCreateGroupDialog by remember { mutableStateOf(false) }
-    var showMoveToGroupDialog by remember { mutableStateOf(false) }
-    var selectedItem by remember { mutableStateOf<FavoriteItem?>(null) }
-    
-    // Focus requesters for handling TV remote navigation
-    val focusRequester = remember { FocusRequester() }
-    val groupCardFocusRequester = remember { FocusRequester() }
-    val favoritesCardFocusRequester = remember { FocusRequester() }
-    
-    // Load favorites and groups when screen is displayed
+    val isTv = remember { DeviceUtils.isTv(context) }
+
+    var favorites by remember { mutableStateOf(StorageUtils.loadAllFavorites(context)) }
+    var selectedTab by remember { mutableStateOf(FavoriteTab.ALL) }
+
     LaunchedEffect(Unit) {
         favorites = StorageUtils.loadAllFavorites(context)
-        groups = StorageUtils.loadAllFavoriteGroups(context)
-        selectedGroup = groups.firstOrNull { it.isDefault } ?: groups.firstOrNull()
     }
-    
-    // Confirmation dialog for deleting all favorites
-    if (showDeleteAllDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteAllDialog = false },
-            title = { Text("حذف تمام علاقه‌مندی ها") },
-            text = { Text("آیا از حذف تمامی علاقه‌مندی ها اطمینان دارید؟ این اقدام قابل بازگشت نیست.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        StorageUtils.clearAllFavorites(context)
-                        favorites = emptyList()
-                        showDeleteAllDialog = false
-                        // Show toast
-                        android.widget.Toast.makeText(context, "تمامی علاقه‌مندی ها حذف شد.", android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Text("حذف")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDeleteAllDialog = false }
-                ) {
-                    Text("انصراف")
-                }
-            }
-        )
-    }
-    
-    // Dialog for creating a new group
-    if (showCreateGroupDialog) {
-        var groupName by remember { mutableStateOf("") }
-        
-        AlertDialog(
-            onDismissRequest = { showCreateGroupDialog = false },
-            title = { Text("ساخت لیست پخش جدید") },
-            text = {
-                OutlinedTextField(
-                    value = groupName,
-                    onValueChange = { groupName = it },
-                    label = { Text("نام لیست پخش") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true, // Prevent new lines
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (groupName.isNotBlank()) {
-                                // Check if group with same name already exists
-                                val existingGroup = groups.find { 
-                                    it.name.equals(groupName, ignoreCase = true) && !it.isDefault
-                                }
-                                
-                                if (existingGroup == null) {
-                                    val newGroup = FavoriteGroup(
-                                        id = UUID.randomUUID().toString(),
-                                        name = groupName,
-                                        isDefault = false
-                                    )
-                                    StorageUtils.saveFavoriteGroup(context, newGroup)
-                                    groups = StorageUtils.loadAllFavoriteGroups(context)
-                                    showCreateGroupDialog = false
-                                    groupName = ""
-                                    // Show success message
-                                    android.widget.Toast.makeText(
-                                        context, 
-                                        "Playlist created successfully", 
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    // Show error message
-                                    android.widget.Toast.makeText(
-                                        context, 
-                                        "A playlist with this name already exists", 
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (groupName.isNotBlank()) {
-                            // Check if group with same name already exists
-                            val existingGroup = groups.find { 
-                                it.name.equals(groupName, ignoreCase = true) && !it.isDefault
-                            }
-                            
-                            if (existingGroup == null) {
-                                val newGroup = FavoriteGroup(
-                                    id = UUID.randomUUID().toString(),
-                                    name = groupName,
-                                    isDefault = false
-                                )
-                                StorageUtils.saveFavoriteGroup(context, newGroup)
-                                groups = StorageUtils.loadAllFavoriteGroups(context)
-                                showCreateGroupDialog = false
-                                groupName = ""
-                                // Show success message
-                                android.widget.Toast.makeText(
-                                    context, 
-                                    "Playlist created successfully", 
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                // Show error message
-                                android.widget.Toast.makeText(
-                                    context, 
-                                    "A playlist with this name already exists", 
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    },
-                    enabled = groupName.isNotBlank()
-                ) {
-                    Text("Create")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showCreateGroupDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-    
-    // Dialog for renaming a group
-    var showRenameGroupDialog by remember { mutableStateOf(false) }
-    var groupToRename by remember { mutableStateOf<FavoriteGroup?>(null) }
-    var newGroupName by remember { mutableStateOf("") }
-    
-    if (showRenameGroupDialog && groupToRename != null) {
-        AlertDialog(
-            onDismissRequest = { showRenameGroupDialog = false },
-            title = { Text("Rename Playlist") },
-            text = {
-                OutlinedTextField(
-                    value = newGroupName,
-                    onValueChange = { newGroupName = it },
-                    label = { Text("New Playlist Name") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            if (newGroupName.isNotBlank() && groupToRename != null) {
-                                // Check if another group with same name already exists
-                                val existingGroup = groups.find { 
-                                    it.id != groupToRename!!.id && 
-                                    it.name.equals(newGroupName, ignoreCase = true) && 
-                                    !it.isDefault
-                                }
-                                
-                                if (existingGroup == null) {
-                                    val updatedGroup = groupToRename!!.copy(name = newGroupName)
-                                    StorageUtils.saveFavoriteGroup(context, updatedGroup)
-                                    groups = StorageUtils.loadAllFavoriteGroups(context)
-                                    showRenameGroupDialog = false
-                                    groupToRename = null
-                                    newGroupName = ""
-                                    // Show success message
-                                    android.widget.Toast.makeText(
-                                        context, 
-                                        "Playlist renamed successfully", 
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    // Show error message
-                                    android.widget.Toast.makeText(
-                                        context, 
-                                        "A playlist with this name already exists", 
-                                        android.widget.Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                    )
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (newGroupName.isNotBlank() && groupToRename != null) {
-                            // Check if another group with same name already exists
-                            val existingGroup = groups.find { 
-                                it.id != groupToRename!!.id && 
-                                it.name.equals(newGroupName, ignoreCase = true) && 
-                                !it.isDefault
-                            }
-                            
-                            if (existingGroup == null) {
-                                val updatedGroup = groupToRename!!.copy(name = newGroupName)
-                                StorageUtils.saveFavoriteGroup(context, updatedGroup)
-                                groups = StorageUtils.loadAllFavoriteGroups(context)
-                                showRenameGroupDialog = false
-                                groupToRename = null
-                                newGroupName = ""
-                                // Show success message
-                                android.widget.Toast.makeText(
-                                    context, 
-                                    "Playlist renamed successfully", 
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            } else {
-                                // Show error message
-                                android.widget.Toast.makeText(
-                                    context, 
-                                    "A playlist with this name already exists", 
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                    },
-                    enabled = newGroupName.isNotBlank()
-                ) {
-                    Text("Rename")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { 
-                        showRenameGroupDialog = false
-                        groupToRename = null
-                        newGroupName = ""
-                    }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-    
-    // Dialog for deleting a group
-    var showDeleteGroupDialog by remember { mutableStateOf(false) }
-    var groupToDelete by remember { mutableStateOf<FavoriteGroup?>(null) }
-    
-    if (showDeleteGroupDialog && groupToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteGroupDialog = false },
-            title = { Text("Delete Playlist") },
-            text = { 
-                Text("Are you sure you want to delete the playlist \"${groupToDelete!!.name}\"? This action cannot be undone.") 
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (groupToDelete != null) {
-                            StorageUtils.removeFavoriteGroup(context, groupToDelete!!.id)
-                            groups = StorageUtils.loadAllFavoriteGroups(context)
-                            
-                            // If the deleted group was the selected group, switch to default
-                            if (selectedGroup?.id == groupToDelete!!.id) {
-                                selectedGroup = groups.firstOrNull { it.isDefault }
-                                favorites = StorageUtils.loadAllFavorites(context)
-                            }
-                            
-                            showDeleteGroupDialog = false
-                            groupToDelete = null
-                            // Show success message
-                            android.widget.Toast.makeText(
-                                context, 
-                                "Playlist deleted successfully", 
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { 
-                        showDeleteGroupDialog = false
-                        groupToDelete = null
-                    }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-    
-    // Dialog for moving item to groups (multi-select)
-    if (showMoveToGroupDialog && selectedItem != null) {
-        val item = selectedItem!!
-        var selectedGroups by remember { mutableStateOf<List<String>>(emptyList()) }
-        
-        // Initialize selected groups
-        LaunchedEffect(item) {
-            val currentGroups = StorageUtils.getGroupsForFavorite(context, item.id, item.type)
-            selectedGroups = currentGroups.map { it.id }
+
+    val filteredFavorites = remember(favorites, selectedTab) {
+        when (selectedTab) {
+            FavoriteTab.ALL -> favorites
+            FavoriteTab.MOVIES -> favorites.filter { it.type == "movie" }
+            FavoriteTab.SERIES -> favorites.filter { it.type == "series" }
         }
-        
-        AlertDialog(
-            onDismissRequest = { showMoveToGroupDialog = false },
-            title = { Text("Select Playlists") },
-            text = {
-                LazyColumn {
-                    items(groups.filter { !it.isDefault }) { group ->
-                        val isChecked = selectedGroups.contains(group.id)
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    selectedGroups = if (isChecked) {
-                                        selectedGroups.filter { it != group.id }
-                                    } else {
-                                        selectedGroups + group.id
-                                    }
-                                }
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            androidx.compose.material3.Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = { checked ->
-                                    selectedGroups = if (checked) {
-                                        selectedGroups + group.id
-                                    } else {
-                                        selectedGroups.filter { it != group.id }
-                                    }
-                                }
-                            )
-                            Text(
-                                text = group.name,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Update group memberships
-                        groups.filter { !it.isDefault }.forEach { group ->
-                            if (selectedGroups.contains(group.id)) {
-                                // Add to group if not already there
-                                if (!StorageUtils.isFavoriteInGroup(context, group.id, item.id, item.type)) {
-                                    StorageUtils.addFavoriteToGroup(context, group.id, item.id, item.type)
-                                }
-                            } else {
-                                // Remove from group if it was there
-                                if (StorageUtils.isFavoriteInGroup(context, group.id, item.id, item.type)) {
-                                    StorageUtils.removeFavoriteFromGroup(context, group.id, item.id, item.type)
-                                }
-                            }
-                        }
-                        
-                        // Refresh data
-                        groups = StorageUtils.loadAllFavoriteGroups(context)
-                        favorites = if (selectedGroup != null && !selectedGroup!!.isDefault) {
-                            StorageUtils.getFavoritesInGroup(context, selectedGroup!!.id)
-                        } else {
-                            StorageUtils.loadAllFavorites(context)
-                        }
-                        
-                        showMoveToGroupDialog = false
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showMoveToGroupDialog = false }
-                ) {
-                    Text("Cancel")
-                }
-            }
-        )
     }
-    
-    Column(
+
+    val moviesCount = remember(favorites) { favorites.count { it.type == "movie" } }
+    val seriesCount = remember(favorites) { favorites.count { it.type == "series" } }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
+            .background(CCloudColors.BackgroundOled)
     ) {
-        // Top App Bar
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(animationSpec = tween(300)) + slideInVertically(animationSpec = tween(300)),
-            exit = fadeOut(animationSpec = tween(300)) + slideOutVertically(animationSpec = tween(300))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(
+                    top = 12.dp,
+                    bottom = if (isTv) 24.dp else 96.dp
+                )
         ) {
+            // 1. Header (نشان‌شده‌ها)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "بازگشت",
-                        tint = Color.White
-                    )
-                }
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = selectedGroup?.name ?: stringResource(R.string.favorites),
-                    style = CinevexTypography.HeroTitle,
-                    color = Color.White,
-                    modifier = Modifier.weight(1f)
+                    text = "نشان‌شده‌ها",
+                    style = CCloudTypography.TitleMedium.copy(fontWeight = FontWeight.Bold),
+                    color = CCloudColors.TextPrimary
                 )
-                
-                // Create group button
-                IconButton(
-                    onClick = { showCreateGroupDialog = true },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .focusable()
-                        .focusRequester(remember { FocusRequester() })
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Create Playlist",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
-                // Delete all button (only show if there are favorites)
+
+                // Delete All Button if not empty
                 if (favorites.isNotEmpty()) {
+                    var showClearConfirm by remember { mutableStateOf(false) }
+
                     IconButton(
-                        onClick = { showDeleteAllDialog = true },
+                        onClick = { showClearConfirm = true },
                         modifier = Modifier
-                            .size(48.dp)
-                            .focusable()
-                            .focusRequester(remember { FocusRequester() })
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .background(CCloudColors.GlassSurface)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete All",
-                            tint = MaterialTheme.colorScheme.primary
-                    )
-                    }
-                }
-            }
-        }
-        
-        // Group selector
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(animationSpec = tween(400)) + slideInVertically(animationSpec = tween(400, delayMillis = 100)),
-            exit = fadeOut(animationSpec = tween(400)) + slideOutVertically(animationSpec = tween(400))
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .focusable()
-                    .focusRequester(groupCardFocusRequester)
-                    .focusProperties {
-                        down = favoritesCardFocusRequester
-                    },
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = "Playlists",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .weight(1f)
+                            contentDescription = "پاک کردن همه",
+                            tint = CCloudColors.TextSecondary,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
-                    
-                    // Display groups as selectable chips
-                    androidx.compose.foundation.lazy.LazyRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(groups) { group ->
-                            Box {
-                                var showGroupMenu by remember { mutableStateOf(false) }
-                                
-                                Card(
-                                    modifier = Modifier
-                                        .padding(vertical = 4.dp)
-                                        .clickable {
-                                            selectedGroup = group
-                                            // Load favorites for this group
-                                            favorites = if (group.isDefault) {
-                                                StorageUtils.loadAllFavorites(context)
-                                            } else {
-                                                StorageUtils.getFavoritesInGroup(context, group.id)
-                                            }
-                                        }
-                                        .focusable()
-                                        .onKeyEvent { keyEvent ->
-                                            when (keyEvent.key) {
-                                                Key.Enter, Key.Spacebar -> {
-                                                    selectedGroup = group
-                                                    // Load favorites for this group
-                                                    favorites = if (group.isDefault) {
-                                                        StorageUtils.loadAllFavorites(context)
-                                                    } else {
-                                                        StorageUtils.getFavoritesInGroup(context, group.id)
-                                                    }
-                                                    true // Handled
-                                                }
-                                                else -> false // Let default handling occur
-                                            }
-                                        },
-                                    shape = RoundedCornerShape(16.dp),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = if (selectedGroup?.id == group.id) 4.dp else 0.dp),
-                                    colors = if (selectedGroup?.id == group.id) {
-                                        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                                    } else {
-                                        CardDefaults.cardColors()
-                                    }
+
+                    if (showClearConfirm) {
+                        AlertDialog(
+                            onDismissRequest = { showClearConfirm = false },
+                            containerColor = CCloudColors.SurfaceDark,
+                            title = {
+                                Text(
+                                    text = "حذف همه نشان‌شده‌ها",
+                                    style = CCloudTypography.TitleSmall,
+                                    color = CCloudColors.TextPrimary
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = "آیا مطمئن هستید که می‌خواهید تمام فیلم‌ها و سریال‌های نشان‌شده را پاک کنید؟",
+                                    style = CCloudTypography.BodyMedium,
+                                    color = CCloudColors.TextSecondary
+                                )
+                            },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        StorageUtils.clearAllFavorites(context)
+                                        favorites = emptyList()
+                                        showClearConfirm = false
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = CCloudColors.AccentRed)
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(text = group.name)
-                                        
-                                        // Show menu icon for non-default groups
-                                        if (!group.isDefault) {
-                                            IconButton(
-                                                onClick = { showGroupMenu = true },
-                                                modifier = Modifier.size(24.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.MoreVert,
-                                                    contentDescription = "Group options",
-                                                    modifier = Modifier.size(16.dp)
-                                                )
-                                            }
-                                        }
-                                    }
+                                    Text("بله، پاک کن", color = Color.White)
                                 }
-                                
-                                // Group menu for rename/delete options
-                                DropdownMenu(
-                                    expanded = showGroupMenu,
-                                    onDismissRequest = { showGroupMenu = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("Rename") },
-                                        onClick = {
-                                            groupToRename = group
-                                            newGroupName = group.name
-                                            showRenameGroupDialog = true
-                                            showGroupMenu = false
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text("Delete") },
-                                        onClick = {
-                                            groupToDelete = group
-                                            showDeleteGroupDialog = true
-                                            showGroupMenu = false
-                                        }
-                                    )
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showClearConfirm = false }) {
+                                    Text("انصراف", color = CCloudColors.TextSecondary)
                                 }
                             }
-                        }
+                        )
                     }
                 }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Content
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(animationSpec = tween(500)) + slideInVertically(animationSpec = tween(500, delayMillis = 200)),
-            exit = fadeOut(animationSpec = tween(500)) + slideOutVertically(animationSpec = tween(500))
-        ) {
-            if (favorites.isEmpty()) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 2. Filter Tabs (همه / فیلم‌ها / سریال‌ها) with counts
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                FavoriteTab.entries.forEach { tab ->
+                    val isSelected = selectedTab == tab
+                    val count = when (tab) {
+                        FavoriteTab.ALL -> favorites.size
+                        FavoriteTab.MOVIES -> moviesCount
+                        FavoriteTab.SERIES -> seriesCount
+                    }
+
+                    val tabTitle = "${tab.title} ($count)"
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassSurface
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassBorder,
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .clickable { selectedTab = tab }
+                            .padding(horizontal = 16.dp, vertical = 7.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = tabTitle,
+                            style = CCloudTypography.LabelSmall.copy(fontWeight = FontWeight.Medium),
+                            color = if (isSelected) Color.White else CCloudColors.TextSecondary
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 3. Favorite Items List
+            if (filteredFavorites.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .weight(1f),
+                        .padding(horizontal = 32.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
-                            modifier = Modifier
-                                .size(48.dp)
-                                .padding(bottom = 16.dp)
+                            tint = CCloudColors.TextMuted,
+                            modifier = Modifier.size(56.dp)
                         )
-                        Text(text = "No favorites yet")
+                        Text(
+                            text = "هنوز هیچ فیلم یا سریالی را نشان نکرده‌اید",
+                            style = CCloudTypography.BodyMedium,
+                            color = CCloudColors.TextSecondary
+                        )
+                        Button(
+                            onClick = {
+                                navController.navigate(AppScreens.Movies.route)
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = CCloudColors.AccentRed),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("مرور فیلم‌ها", color = Color.White)
+                        }
                     }
                 }
             } else {
-                // State variables for the confirmation dialog
-                var showRemoveFavoriteDialog by remember { mutableStateOf(false) }
-                var favoriteToRemove by remember { mutableStateOf<FavoriteItem?>(null) }
-                
-                // Confirmation dialog for removing from favorites
-                if (showRemoveFavoriteDialog && favoriteToRemove != null) {
-                    AlertDialog(
-                        onDismissRequest = { showRemoveFavoriteDialog = false },
-                        title = { Text("Remove from Favorites") },
-                        text = { Text("Are you sure you want to remove \"${favoriteToRemove!!.title}\" from your favorites?") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    StorageUtils.removeFavorite(context, favoriteToRemove!!.id, favoriteToRemove!!.type)
-                                    // Refresh the favorites list
-                                    favorites = if (selectedGroup != null && !selectedGroup!!.isDefault) {
-                                        StorageUtils.getFavoritesInGroup(context, selectedGroup!!.id)
-                                    } else {
-                                        StorageUtils.loadAllFavorites(context)
-                                    }
-                                    showRemoveFavoriteDialog = false
-                                    favoriteToRemove = null
-                                    // Show toast
-                                    android.widget.Toast.makeText(context, "Removed from favorites", android.widget.Toast.LENGTH_SHORT).show()
-                                }
-                            ) {
-                                Text("Remove")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { 
-                                    showRemoveFavoriteDialog = false
-                                    favoriteToRemove = null
-                                }
-                            ) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
-                
-                val isTv = remember { DeviceUtils.isTv(context) }
-                val gridColumns = remember(isTv) {
-                    if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    LazyVerticalGrid(
-                        columns = gridColumns,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        items(favorites) { favorite ->
-                            MediaCard(
-                                movie = favorite.toMovie(),
-                                onClick = {
-                                    if (favorite.type == "movie") {
-                                        StorageUtils.saveMovieToFile(context, favorite.toMovie())
-                                        navController.navigate(AppScreens.SingleMovie.createRoute(favorite.id))
-                                    } else {
-                                        StorageUtils.saveSeriesToFile(context, favorite.toSeries())
-                                        navController.navigate(AppScreens.SingleSeries.createRoute(favorite.id))
-                                    }
-                                },
-                                onLongClick = {
-                                    favoriteToRemove = favorite
-                                    showRemoveFavoriteDialog = true
+                    items(
+                        items = filteredFavorites,
+                        key = { "${it.type}_${it.id}" }
+                    ) { item ->
+                        FavoriteListItem(
+                            item = item,
+                            onClick = {
+                                if (item.type == "movie") {
+                                    StorageUtils.saveFavoriteToDatabase(context, item)
+                                    navController.navigate(AppScreens.SingleMovie.createRoute(item.id))
+                                } else {
+                                    StorageUtils.saveFavoriteToDatabase(context, item)
+                                    navController.navigate(AppScreens.SingleSeries.createRoute(item.id))
                                 }
-                            )
-                        }
+                            },
+                            onRemove = {
+                                StorageUtils.removeFavorite(context, item.id, item.type)
+                                favorites = StorageUtils.loadAllFavorites(context)
+                            }
+                        )
                     }
                 }
             }
@@ -813,122 +272,127 @@ fun FavoritesScreen(navController: NavController) {
 }
 
 @Composable
-fun FavoriteItemCard(
-    favorite: FavoriteItem,
+private fun FavoriteListItem(
+    item: FavoriteItem,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
-    onMoveToGroup: (FavoriteItem) -> Unit
+    onRemove: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    var showMenu by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-    
-    Card(
-        modifier = Modifier
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (isFocused) 1.02f else 1.0f,
+        label = "fav_scale"
+    )
+
+    Row(
+        modifier = modifier
             .fillMaxWidth()
-            .clickable { onClick() }
-            .focusable()
-            .focusRequester(focusRequester)
-            .onKeyEvent { keyEvent ->
-                when (keyEvent.key) {
-                    Key.Enter, Key.Spacebar -> {
-                        onClick()
-                        true // Handled
-                    }
-                    else -> false // Let default handling occur
-                }
-            },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Poster image
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(favorite.image)
-                        .crossfade(true)
-                        .build()
-                ),
-                contentDescription = favorite.title,
-                modifier = Modifier
-                    .height(80.dp)
-                    .width(60.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+            .scale(scale)
+            .clip(RoundedCornerShape(14.dp))
+            .background(CCloudColors.GlassSurface)
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                color = if (isFocused) CCloudColors.GlassBorderFocus else CCloudColors.GlassBorder,
+                shape = RoundedCornerShape(14.dp)
             )
-            
-            // Title and details
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .focusable(interactionSource = interactionSource)
+            .padding(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Red Heart Remove Button on right (in RTL) / action side
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color(0x22E50914))
+        ) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "حذف از نشان‌شده‌ها",
+                tint = CCloudColors.AccentRed,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Info Column
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = item.title,
+                style = CCloudTypography.BodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = CCloudColors.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // Type badge
                 Text(
-                    text = favorite.title,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    text = if (item.type == "movie") "فیلم" else "سریال",
+                    style = CCloudTypography.LabelSmall,
+                    color = CCloudColors.TextMuted
                 )
-                
-                // Show type and year
-                Text(
-                    text = "${favorite.type.capitalize()} • ${favorite.year}",
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Favorite,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .padding(end = 4.dp),
-                        tint = androidx.compose.ui.graphics.Color.Red
-                    )
+
+                if (item.year > 0) {
                     Text(
-                        text = String.format("%.1f", favorite.imdb)
+                        text = "• ${item.year}",
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextMuted
                     )
+                }
+
+                if (item.imdb > 0.0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = CCloudColors.RatingGold,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = String.format("%.1f", item.imdb),
+                            style = CCloudTypography.LabelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = CCloudColors.RatingGold
+                        )
+                    }
                 }
             }
-            
-            // Menu button for additional actions
-            Box {
-                IconButton(
-                    onClick = { showMenu = true },
-                    modifier = Modifier.focusable()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More options"
-                    )
-                }
-                
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Move to Playlist") },
-                        onClick = {
-                            onMoveToGroup(favorite)
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Delete") },
-                        onClick = {
-                            showMenu = false
-                            onDelete()
-                        }
-                    )
-                }
-            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Poster Thumbnail
+        Box(
+            modifier = Modifier
+                .width(60.dp)
+                .height(84.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(CCloudColors.SurfaceDark)
+        ) {
+            AsyncImage(
+                model = item.image,
+                contentDescription = item.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }

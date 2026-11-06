@@ -94,6 +94,7 @@ import com.farshidrezaei.ccloudplus.data.model.VideoPlayerSettings
 import com.farshidrezaei.ccloudplus.data.model.FontSettings
 import com.farshidrezaei.ccloudplus.data.model.WatchedEpisode
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
 import com.farshidrezaei.ccloudplus.core.theme.FontManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -176,7 +177,12 @@ class VideoPlayerActivity : ComponentActivity() {
         // Keep screen on while in video player
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         
-        videoUrl = intent.getStringExtra(EXTRA_VIDEO_URL)
+        videoUrl = intent.getStringExtra(EXTRA_VIDEO_URL) ?: intent.getStringExtra("video_url")
+        val videoTitle = intent.getStringExtra("video_title") ?: ""
+        val mediaId = intent.getIntExtra("media_id", 0)
+        val mediaType = intent.getStringExtra("media_type") ?: "movie"
+        val mediaPoster = intent.getStringExtra("media_poster") ?: ""
+        val seekTo = intent.getLongExtra("seek_to", 0L)
         seriesId = intent.getIntExtra(EXTRA_SERIES_ID, -1).takeIf { it != -1 }
         seasonId = intent.getIntExtra(EXTRA_SEASON_ID, -1).takeIf { it != -1 }
         episodeId = intent.getIntExtra(EXTRA_EPISODE_ID, -1).takeIf { it != -1 }
@@ -184,7 +190,12 @@ class VideoPlayerActivity : ComponentActivity() {
         if (videoUrl != null) {
             setContent {
                 VideoPlayerScreen(
-                    videoUrl = videoUrl!!, 
+                    videoUrl = videoUrl!!,
+                    videoTitle = videoTitle,
+                    mediaId = mediaId,
+                    mediaType = mediaType,
+                    mediaPoster = mediaPoster,
+                    seekTo = seekTo,
                     seriesId = seriesId,
                     seasonId = seasonId,
                     episodeId = episodeId,
@@ -333,6 +344,11 @@ class VideoPlayerActivity : ComponentActivity() {
 @Composable
 fun VideoPlayerScreen(
     videoUrl: String,
+    videoTitle: String = "",
+    mediaId: Int = 0,
+    mediaType: String = "movie",
+    mediaPoster: String = "",
+    seekTo: Long = 0L,
     seriesId: Int?,
     seasonId: Int?,
     episodeId: Int?,
@@ -354,6 +370,8 @@ fun VideoPlayerScreen(
     var showSpeedDropdown by remember { mutableStateOf(false) }
     var playerInitialized by remember { mutableStateOf(false) }
     var hasMarkedAsWatched by remember { mutableStateOf(false) }
+    var hasResumedSeek by remember { mutableStateOf(false) }
+    var resizeMode by remember { mutableStateOf(AspectRatioFrameLayout.RESIZE_MODE_FIT) }
     
     // Track selection state
     var showTrackSelectionDialog by remember { mutableStateOf(false) }
@@ -461,12 +479,46 @@ fun VideoPlayerScreen(
         }
     }
     
+    LaunchedEffect(duration) {
+        if (!hasResumedSeek && seekTo > 0 && duration > 0) {
+            hasResumedSeek = true
+            exoPlayer?.seekTo(seekTo)
+        }
+    }
+
     DisposableEffect(exoPlayer) {
         onDispose {
             try {
+                exoPlayer?.let { p ->
+                    val pos = p.currentPosition
+                    val dur = p.duration
+                    if (mediaId > 0 && dur > 0) {
+                        StorageUtils.savePlaybackPosition(
+                            context, mediaId, mediaType, videoTitle, mediaPoster, videoUrl,
+                            pos, dur, seriesId ?: 0, seasonId ?: 0, episodeId ?: 0
+                        )
+                    }
+                }
                 exoPlayer?.removeListener(trackListener)
             } catch (e: Exception) {
                 // Ignore listener removal errors
+            }
+        }
+    }
+
+    // Periodic continue watching progress saver
+    LaunchedEffect(isPlaying, exoPlayer) {
+        while (isPlaying) {
+            delay(5000)
+            exoPlayer?.let { p ->
+                val pos = p.currentPosition
+                val dur = p.duration
+                if (mediaId > 0 && dur > 0) {
+                    StorageUtils.savePlaybackPosition(
+                        context, mediaId, mediaType, videoTitle, mediaPoster, videoUrl,
+                        pos, dur, seriesId ?: 0, seasonId ?: 0, episodeId ?: 0
+                    )
+                }
             }
         }
     }
@@ -794,7 +846,7 @@ fun VideoPlayerScreen(
                             ViewGroup.LayoutParams.MATCH_PARENT
                         )
                         // Make the player view fill the entire screen
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        this.resizeMode = resizeMode
                         
                         // Apply subtitle settings to the player view
                         // Set subtitle styling with custom font
@@ -811,9 +863,8 @@ fun VideoPlayerScreen(
             modifier = Modifier.fillMaxSize(),
             update = { playerView ->
                 try {
-                    // Update the player view when subtitle settings change
-                    // Update subtitle styling when settings change
                     if (playerView is PlayerView) {
+                        playerView.resizeMode = resizeMode
                         playerView.setSubtitleTextSize(subtitleSettings.textSize)
                         playerView.setSubtitleColors(subtitleSettings, customTypeface)
                     }
@@ -882,7 +933,7 @@ fun VideoPlayerScreen(
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.5f))
             ) {
-                // Top bar with back button and settings
+                // Top bar with back button, video title and settings
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -891,11 +942,12 @@ fun VideoPlayerScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(44.dp)
                             .background(
                                 color = Color.Black.copy(alpha = 0.7f),
                                 shape = androidx.compose.foundation.shape.CircleShape
                             )
+                            .align(Alignment.CenterStart)
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -903,17 +955,30 @@ fun VideoPlayerScreen(
                             tint = Color.White
                         )
                     }
-                    
+
+                    if (videoTitle.isNotBlank()) {
+                        Text(
+                            text = videoTitle,
+                            color = Color.White,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(horizontal = 56.dp)
+                        )
+                    }
+
                     // Settings button in top right corner
                     IconButton(
                         onClick = { showTrackSelectionDialog = true },
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(44.dp)
                             .background(
                                 color = Color.Black.copy(alpha = 0.7f),
                                 shape = androidx.compose.foundation.shape.CircleShape
                             )
-                            .align(Alignment.TopEnd)
+                            .align(Alignment.CenterEnd)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -922,32 +987,86 @@ fun VideoPlayerScreen(
                         )
                     }
                 }
-                
-                // Middle play/pause button
+
+                // Middle 10s Rewind - Play/Pause - 10s Forward controls
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .weight(1f),
                     contentAlignment = Alignment.Center
                 ) {
-                    IconButton(
-                        onClick = { isPlaying = !isPlaying },
-                        modifier = Modifier
-                            .size(64.dp)
-                            .background(
-                                color = Color.Black.copy(alpha = 0.7f),
-                                shape = androidx.compose.foundation.shape.CircleShape
-                            )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(40.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            tint = Color.White,
-                            modifier = Modifier.size(32.dp)
-                        )
+                        // Rewind 10s
+                        IconButton(
+                            onClick = {
+                                exoPlayer?.let { p ->
+                                    val newPos = (p.currentPosition - 10000L).coerceAtLeast(0L)
+                                    p.seekTo(newPos)
+                                    currentPosition = newPos
+                                }
+                            },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Replay,
+                                contentDescription = "Rewind 10s",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+
+                        // Play / Pause in signature CCloud+ Red
+                        IconButton(
+                            onClick = { isPlaying = !isPlaying },
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(
+                                    color = CCloudColors.AccentRed,
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                tint = Color.White,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+
+                        // Forward 10s
+                        IconButton(
+                            onClick = {
+                                exoPlayer?.let { p ->
+                                    val newPos = (p.currentPosition + 10000L).coerceAtMost(duration)
+                                    p.seekTo(newPos)
+                                    currentPosition = newPos
+                                }
+                            },
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = Color.Black.copy(alpha = 0.6f),
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Forward,
+                                contentDescription = "Forward 10s",
+                                tint = Color.White,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
                 }
-                
+
                 // Bottom controls
                 Column(
                     modifier = Modifier
@@ -957,17 +1076,16 @@ fun VideoPlayerScreen(
                 ) {
                     // Progress slider with retry animation
                     if (isRetrying) {
-                        // Show animated progress bar when retrying
                         androidx.compose.material3.LinearProgressIndicator(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 8.dp)
+                                .padding(vertical = 8.dp),
+                            color = CCloudColors.AccentRed
                         )
                     } else {
                         Slider(
                             value = if (duration > 0) currentPosition.toFloat() / duration.toFloat() else 0f,
                             onValueChange = { progress ->
-                                // Store the playing state before seeking
                                 if (!isSeeking) {
                                     wasPlayingBeforeSeek = isPlaying
                                 }
@@ -976,7 +1094,6 @@ fun VideoPlayerScreen(
                                 try {
                                     exoPlayer?.seekTo(newPosition)
                                     currentPosition = newPosition
-                                    // Keep the player playing during seeking if it was playing before
                                     if (wasPlayingBeforeSeek) {
                                         exoPlayer?.playWhenReady = true
                                     }
@@ -986,15 +1103,18 @@ fun VideoPlayerScreen(
                             },
                             onValueChangeFinished = {
                                 isSeeking = false
-                                // Restore the playing state after seeking is finished
                                 try {
                                     exoPlayer?.playWhenReady = wasPlayingBeforeSeek
-                                    // Update isPlaying state to match the player's actual state
                                     isPlaying = wasPlayingBeforeSeek
                                 } catch (e: Exception) {
                                     // Ignore errors
                                 }
                             },
+                            colors = androidx.compose.material3.SliderDefaults.colors(
+                                thumbColor = CCloudColors.AccentRed,
+                                activeTrackColor = CCloudColors.AccentRed,
+                                inactiveTrackColor = Color.White.copy(alpha = 0.3f)
+                            ),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -1116,6 +1236,36 @@ fun VideoPlayerScreen(
                             )
                         }
                         
+                        // Aspect Ratio button
+                        val aspectLabel = when (resizeMode) {
+                            AspectRatioFrameLayout.RESIZE_MODE_FIT -> "تناسب"
+                            AspectRatioFrameLayout.RESIZE_MODE_FILL -> "کشش"
+                            AspectRatioFrameLayout.RESIZE_MODE_ZOOM -> "زوم"
+                            else -> "تناسب"
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.Black.copy(alpha = 0.6f))
+                                .clickable {
+                                    resizeMode = when (resizeMode) {
+                                        AspectRatioFrameLayout.RESIZE_MODE_FIT -> AspectRatioFrameLayout.RESIZE_MODE_FILL
+                                        AspectRatioFrameLayout.RESIZE_MODE_FILL -> AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                                        else -> AspectRatioFrameLayout.RESIZE_MODE_FIT
+                                    }
+                                }
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = aspectLabel,
+                                color = Color.White,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
                         Text(
                             text = formatTime(duration),
                             color = Color.White,

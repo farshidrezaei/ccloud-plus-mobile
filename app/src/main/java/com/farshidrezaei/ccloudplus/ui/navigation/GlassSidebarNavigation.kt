@@ -133,6 +133,41 @@ fun GlassSidebarNavigation(
                 }
             }
 
+            // Settings Icon at bottom of Sidebar for TV
+            val isSettingsSelected = currentRoute == AppScreens.Settings.route
+            val settingsInteractionSource = remember { MutableInteractionSource() }
+            val isSettingsFocused by settingsInteractionSource.collectIsFocusedAsState()
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (isSettingsSelected) CinevexColors.GlassSurfaceElevated
+                        else if (isSettingsFocused) CinevexColors.GlassSurfaceHover
+                        else Color.Transparent
+                    )
+                    .border(
+                        width = if (isSettingsFocused) 2.dp else if (isSettingsSelected) 1.dp else 0.dp,
+                        color = if (isSettingsFocused) CinevexColors.GlassBorderFocus else CinevexColors.AccentRed,
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .clickable(
+                        interactionSource = settingsInteractionSource,
+                        indication = null
+                    ) {
+                        navController.navigate(AppScreens.Settings.route)
+                    }
+                    .focusable(interactionSource = settingsInteractionSource),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "تنظیمات",
+                    tint = if (isSettingsSelected || isSettingsFocused) CinevexColors.AccentRed else CinevexColors.TextSecondary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(20.dp))
         }
     }

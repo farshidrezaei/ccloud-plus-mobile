@@ -4,7 +4,11 @@ import com.farshidrezaei.ccloudplus.data.model.*
 import com.farshidrezaei.ccloudplus.data.repository.SeriesRepository
 
 class SeriesViewModel : BaseMediaListViewModel<Series>() {
-    private val repository = SeriesRepository()
+    private val repository by lazy { SeriesRepository() }
+
+    init {
+        initialize()
+    }
 
     override val featuredItems: List<Movie>
         get() = allItems.filter { it.cover.isNotBlank() || it.image.isNotBlank() }.take(6).map { it.toMovie() }

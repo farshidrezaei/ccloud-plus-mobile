@@ -1,6 +1,5 @@
 package com.farshidrezaei.ccloudplus.ui.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -20,13 +19,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 
 @Composable
 fun GlassBottomNavigation(
@@ -39,26 +40,26 @@ fun GlassBottomNavigation(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .shadow(24.dp, RoundedCornerShape(28.dp), spotColor = Color.Black)
-                .clip(RoundedCornerShape(28.dp))
-                .background(Color(0xE613151B)) // Deep glass
-                .border(1.dp, CinevexColors.GlassBorder, RoundedCornerShape(28.dp))
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .shadow(20.dp, RoundedCornerShape(26.dp), spotColor = Color.Black)
+                .clip(RoundedCornerShape(26.dp))
+                .background(Color(0xE613151B))
+                .border(1.dp, CCloudColors.GlassBorder, RoundedCornerShape(26.dp))
+                .padding(horizontal = 8.dp, vertical = 6.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 AppScreens.navigationItems.forEach { screen ->
                     val isSelected = currentRoute == screen.route
                     val tint by animateColorAsState(
-                        targetValue = if (isSelected) CinevexColors.AccentRed else CinevexColors.TextSecondary,
+                        targetValue = if (isSelected) CCloudColors.AccentRed else CCloudColors.TextSecondary,
                         animationSpec = tween(200),
                         label = "tab_tint"
                     )
@@ -69,7 +70,7 @@ fun GlassBottomNavigation(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .weight(1f)
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(14.dp))
                             .clickable(
                                 interactionSource = interactionSource,
                                 indication = null
@@ -84,14 +85,14 @@ fun GlassBottomNavigation(
                                     }
                                 }
                             }
-                            .padding(vertical = 6.dp)
+                            .padding(vertical = 4.dp)
                     ) {
                         screen.icon?.let { icon ->
                             Icon(
                                 imageVector = icon,
                                 contentDescription = stringResource(screen.resourceId),
                                 tint = tint,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(21.dp)
                             )
                         }
 
@@ -99,7 +100,10 @@ fun GlassBottomNavigation(
 
                         Text(
                             text = stringResource(screen.resourceId),
-                            style = CinevexTypography.LabelSmall,
+                            style = CCloudTypography.LabelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                            ),
                             color = tint,
                             maxLines = 1,
                             softWrap = false,

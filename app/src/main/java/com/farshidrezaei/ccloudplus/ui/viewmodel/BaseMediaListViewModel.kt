@@ -56,7 +56,7 @@ abstract class BaseMediaListViewModel<T> : ViewModel() {
         isLoadingMore = false
     }
 
-    init {
+    protected fun initialize() {
         loadGenres()
         loadItems()
     }

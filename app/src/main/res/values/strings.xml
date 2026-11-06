@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CCloud+</string>
     <string name="app_full_name">CCloud Plus</string>
+    <string name="home">خانه</string>
     <string name="movies">فیلم‌ها</string>
     <string name="series">سریال‌ها</string>
     <string name="search">جستجو</string>
@@ -11,5 +12,5 @@
     <string name="video_player">پخش‌کننده ویدیو</string>
     <string name="favorites">نشان‌شده‌ها</string>
     <string name="downloads">دانلودها</string>
-    <string name="country">کشور</string>
+    <string name="country">کشورها</string>
 </resources>
