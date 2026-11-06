@@ -59,8 +59,8 @@ fun MediaActionSheet(
             id = item.id
             title = item.title
             image = item.image
-            year = item.year
-            imdb = item.imdb
+            year = item.year.toString()
+            imdb = item.imdb.toString()
             videoUrl = ""
         }
         else -> return

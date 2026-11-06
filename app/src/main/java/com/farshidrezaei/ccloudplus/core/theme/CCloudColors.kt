@@ -60,6 +60,3 @@ object CCloudColors {
         )
     )
 }
-
-// Typealias to migrate away from Cinevex gracefully without breakages
-typealias CinevexColors = CCloudColors

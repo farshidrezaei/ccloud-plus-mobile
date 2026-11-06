@@ -32,6 +32,14 @@ object CCloudTypography {
         color = CCloudColors.TextPrimary
     )
 
+    val TitleSmall = TextStyle(
+        fontFamily = defaultFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        color = CCloudColors.TextPrimary
+    )
+
     val BodyLarge = TextStyle(
         fontFamily = defaultFontFamily,
         fontWeight = FontWeight.Normal,
@@ -78,5 +86,3 @@ object CCloudTypography {
         lineHeight = 14.sp
     )
 }
-
-typealias CinevexTypography = CCloudTypography
