@@ -143,7 +143,7 @@ fun CountryScreen(
                                 )
                             },
                             onClick = {
-                                viewModel.setFilterType(FilterType.DEFAULT)
+                                viewModel.selectFilterType(FilterType.DEFAULT)
                                 showFilterMenu = false
                             }
                         )
@@ -156,7 +156,7 @@ fun CountryScreen(
                                 )
                             },
                             onClick = {
-                                viewModel.setFilterType(FilterType.BY_YEAR)
+                                viewModel.selectFilterType(FilterType.BY_YEAR)
                                 showFilterMenu = false
                             }
                         )
@@ -169,7 +169,7 @@ fun CountryScreen(
                                 )
                             },
                             onClick = {
-                                viewModel.setFilterType(FilterType.BY_IMDB)
+                                viewModel.selectFilterType(FilterType.BY_IMDB)
                                 showFilterMenu = false
                             }
                         )
@@ -232,7 +232,7 @@ fun CountryScreen(
                             ) { index, poster ->
                                 if (index >= posters.size - 4 && !isLoadingMore && viewModel.canLoadMore) {
                                     LaunchedEffect(Unit) {
-                                        viewModel.loadMore()
+                                        viewModel.loadMorePosters()
                                     }
                                 }
 
@@ -279,18 +279,8 @@ fun CountryScreen(
         selectedPosterForAction?.let { poster ->
             MediaActionSheet(
                 item = poster.toMovie(),
-                onDismiss = { selectedPosterForAction = null },
-                onNavigateToDetail = {
-                    val p = poster
-                    selectedPosterForAction = null
-                    if (p.type == "serie" || p.type == "series") {
-                        StorageUtils.saveSeriesToFile(context, p.toSeries())
-                        navController?.navigate(AppScreens.SingleSeries.createRoute(p.id))
-                    } else {
-                        StorageUtils.saveMovieToFile(context, p.toMovie())
-                        navController?.navigate(AppScreens.SingleMovie.createRoute(p.id))
-                    }
-                }
+                mediaType = poster.type,
+                onDismiss = { selectedPosterForAction = null }
             )
         }
     }

@@ -745,7 +745,7 @@ private fun EpisodeGlassCard(
                             // Download
                             IconButton(
                                 onClick = {
-                                    DownloadUtils.downloadFile(context, source.url, "${episode.title} - ${source.quality}.mp4")
+                                    DownloadUtils.openUrl(context, source.url)
                                 },
                                 modifier = Modifier.size(28.dp)
                             ) {
