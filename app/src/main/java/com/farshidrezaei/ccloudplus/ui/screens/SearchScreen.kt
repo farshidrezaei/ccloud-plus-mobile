@@ -71,7 +71,11 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.farshidrezaei.ccloudplus.R
-import com.farshidrezaei.ccloudplus.data.model.Country
+import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.ui.components.MediaCard
+import com.farshidrezaei.ccloudplus.ui.components.GlassButton
+import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.data.model.Poster
 import com.farshidrezaei.ccloudplus.ui.viewmodel.SearchViewModel
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
@@ -94,6 +98,7 @@ fun SearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(CinevexColors.BackgroundOled)
             .padding(16.dp)
     ) {
         // Search bar
@@ -104,18 +109,16 @@ fun SearchScreen(
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .clickable { 
-                    // Ensure keyboard opens when clicking on the TextField on TV
                     focusRequester.requestFocus()
                 },
             placeholder = { 
                 Text(
-                    text = "Search movies and series...",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "جستجوی فیلم و سریال...",
+                    color = CinevexColors.TextSecondary
                 ) 
             },
             leadingIcon = {
                 IconButton(onClick = { 
-                    // Trigger search when clicking search icon
                     if (viewModel.searchQuery.isNotEmpty()) {
                         viewModel.triggerSearch()
                         focusManager.clearFocus()
@@ -123,8 +126,8 @@ fun SearchScreen(
                 }) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        contentDescription = "جستجو",
+                        tint = CinevexColors.AccentRed
                     )
                 }
             },
@@ -132,12 +135,12 @@ fun SearchScreen(
                 if (viewModel.searchQuery.isNotEmpty()) {
                     IconButton(onClick = { 
                         viewModel.clearSearch()
-                        focusManager.clearFocus() // Dismiss keyboard when clearing search
+                        focusManager.clearFocus()
                     }) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            contentDescription = "پاک کردن",
+                            tint = CinevexColors.TextSecondary
                         )
                     }
                 }
@@ -147,7 +150,6 @@ fun SearchScreen(
             ),
             keyboardActions = KeyboardActions(
                 onSearch = {
-                    // Trigger search when pressing Enter
                     if (viewModel.searchQuery.isNotEmpty()) {
                         viewModel.triggerSearch()
                     }
@@ -158,10 +160,12 @@ fun SearchScreen(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                focusedContainerColor = CinevexColors.GlassSurfaceElevated,
+                unfocusedContainerColor = CinevexColors.GlassSurface,
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White
             ),
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(16.dp),
             singleLine = true
         )
         
@@ -176,7 +180,7 @@ fun SearchScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.primary
+                        color = CinevexColors.AccentRed
                     )
                 }
             } else if (viewModel.countries.isNotEmpty()) {
@@ -190,8 +194,7 @@ fun SearchScreen(
                         CountryStoryItem(
                             country = country,
                             onClick = {
-                                // Navigate to country screen
-                                navController?.navigate("country/${country.id}")
+                                navController?.navigate(AppScreens.Country.createRoute(country.id))
                             }
                         )
                     }
@@ -209,8 +212,8 @@ fun SearchScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp),
-                        color = MaterialTheme.colorScheme.primary
+                        modifier = Modifier.size(40.dp),
+                        color = CinevexColors.AccentRed
                     )
                 }
             }
@@ -223,23 +226,15 @@ fun SearchScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Error: ${viewModel.errorMessage}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
+                            text = "خطا: ${viewModel.errorMessage}",
+                            style = CinevexTypography.BodyMedium,
+                            color = CinevexColors.AccentRed
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Please try again",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Spacer(modifier = Modifier.height(12.dp))
+                        GlassButton(
+                            text = "تلاش مجدد",
+                            onClick = { viewModel.triggerSearch() }
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { viewModel.triggerSearch() },
-                            modifier = Modifier.padding(16.dp)
-                        ) {
-                            Text("Retry")
-                        }
                     }
                 }
             }
@@ -250,16 +245,15 @@ fun SearchScreen(
                     context = context
                 )
             }
-            // Only show "No results found" after a search has been performed
             viewModel.hasSearched && viewModel.searchQuery.isNotEmpty() && !viewModel.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No results found",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = "نتیجه‌ای یافت نشد",
+                        style = CinevexTypography.TitleMedium,
+                        color = CinevexColors.TextSecondary
                     )
                 }
             }
@@ -274,19 +268,19 @@ fun SearchScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
+                            contentDescription = "جستوجو",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Search for movies and series",
+                            text = "جستوجو دز فیلم ها و سریال ها",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Enter a keyword to start searching",
+                            text = "برای شروع جستوجو عبارتی را وارد کنید",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -346,168 +340,32 @@ fun SearchResultsGrid(
     navController: NavController?,
     context: Context
 ) {
-    val columns = DeviceUtils.getGridColumns(LocalContext.current.resources)
+    val isTv = remember { DeviceUtils.isTv(context) }
+    val gridColumns = remember(isTv) {
+        if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
+    }
+
     LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
+        columns = gridColumns,
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(0.dp),
+        contentPadding = PaddingValues(bottom = 24.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(posters) { poster ->
-            PosterItem(
-                poster = poster,
+            MediaCard(
+                movie = poster.toMovie(),
                 onClick = {
                     if (poster.isMovie()) {
-                        // Save movie to storage and navigate to single movie screen
                         StorageUtils.saveMovieToFile(context, poster.toMovie())
-                        navController?.navigate("single_movie/${poster.id}")
-                    } else if (poster.isSeries()) {
-                        // Save series to storage and navigate to single series screen
+                        navController?.navigate(AppScreens.SingleMovie.createRoute(poster.id))
+                    } else {
                         StorageUtils.saveSeriesToFile(context, poster.toSeries())
-                        navController?.navigate("single_series/${poster.id}")
+                        navController?.navigate(AppScreens.SingleSeries.createRoute(poster.id))
                     }
-                }
+                },
+                onLongClick = {}
             )
-        }
-    }
-}
-
-@Composable
-fun PosterItem(
-    poster: Poster,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(310.dp) // Fixed height for all cards
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp)
-        ) {
-            // Poster image with rating overlay
-            Box {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(poster.image)
-                            .crossfade(true)
-                            .build()
-                    ),
-                    contentDescription = poster.title,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                
-                // Rating overlay at top-right corner
-                Card(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(50.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.Black.copy(alpha = 0.7f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Rating",
-                            tint = Color.Yellow,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = String.format("%.1f", poster.imdb),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-                
-                // Type indicator at bottom-right corner
-                Card(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(50.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (poster.isMovie()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        }
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = if (poster.isMovie()) "Movie" else "Series",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (poster.isMovie()) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSecondary
-                            },
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Poster details with weight to fill remaining space
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = poster.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = poster.year.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Genres
-                if (poster.genres.isNotEmpty()) {
-                    Text(
-                        text = poster.genres.joinToString(", ") { it.title },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
         }
     }
 }

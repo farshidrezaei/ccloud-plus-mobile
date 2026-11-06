@@ -13,8 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import com.farshidrezaei.ccloudplus.ui.components.*
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.ui.viewmodel.MoviesViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoviesScreen(
     navController: NavController,
@@ -76,38 +79,44 @@ fun MoviesScreen(
                 )
             }
             else -> {
-                LazyVerticalGrid(
-                    columns = gridColumns,
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = if (isTv) 24.dp else 90.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                PullToRefreshBox(
+                    isRefreshing = isLoading && movies.isNotEmpty(),
+                    onRefresh = { viewModel.refresh() },
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // 1. Featured Hero Carousel (Full span)
-                    if (featuredMovies.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            FeaturedHeroCarousel(
-                                featuredItems = featuredMovies,
-                                onPlayClick = { movie ->
-                                    val source = movie.sources.firstOrNull()?.url ?: ""
-                                    val intent = Intent(context, VideoPlayerActivity::class.java).apply {
-                                        putExtra("video_url", source)
-                                        putExtra("video_title", movie.title)
-                                    }
-                                    context.startActivity(intent)
-                                },
-                                onDetailsClick = { movie ->
-                                    navController.navigate(AppScreens.SingleMovie.createRoute(movie.id))
-                                },
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                    LazyVerticalGrid(
+                        columns = gridColumns,
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = if (isTv) 24.dp else 90.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // 1. Featured Hero Carousel (Full span)
+                        if (featuredMovies.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                FeaturedHeroCarousel(
+                                    featuredItems = featuredMovies,
+                                    onPlayClick = { movie ->
+                                        val source = movie.sources.firstOrNull()?.url ?: ""
+                                        val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                                            putExtra("video_url", source)
+                                            putExtra("video_title", movie.title)
+                                        }
+                                        context.startActivity(intent)
+                                    },
+                                    onDetailsClick = { movie ->
+                                        StorageUtils.saveMovieToFile(context, movie)
+                                        navController.navigate(AppScreens.SingleMovie.createRoute(movie.id))
+                                    },
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
                         }
-                    }
 
                     // 2. Genre Chips & Filter Row (Full span)
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -191,6 +200,7 @@ fun MoviesScreen(
                         MediaCard(
                             movie = movie,
                             onClick = {
+                                StorageUtils.saveMovieToFile(context, movie)
                                 navController.navigate(AppScreens.SingleMovie.createRoute(movie.id))
                             },
                             onLongClick = {
@@ -218,6 +228,7 @@ fun MoviesScreen(
                 }
             }
         }
+    }
 
         // Preview BottomSheet
         if (previewMovie != null) {
@@ -233,6 +244,7 @@ fun MoviesScreen(
                     context.startActivity(intent)
                 },
                 onDetailsClick = { movie ->
+                    StorageUtils.saveMovieToFile(context, movie)
                     navController.navigate(AppScreens.SingleMovie.createRoute(movie.id))
                 },
                 onToggleFavorite = { movie ->

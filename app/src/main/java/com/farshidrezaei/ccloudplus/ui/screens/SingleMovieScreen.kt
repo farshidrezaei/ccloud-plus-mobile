@@ -67,7 +67,10 @@ import com.farshidrezaei.ccloudplus.ui.components.ExpandableText
 import com.farshidrezaei.ccloudplus.data.model.FavoriteItem
 import com.farshidrezaei.ccloudplus.data.model.Movie
 import com.farshidrezaei.ccloudplus.data.model.Source
-import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
+import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.ui.components.GlassButton
+import androidx.compose.material3.CircularProgressIndicator
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,45 +80,51 @@ fun SingleMovieScreen(
     navController: NavController
 ) {
     var movie by remember { mutableStateOf<Movie?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
     
     LaunchedEffect(movieId) {
         movie = StorageUtils.loadMovieFromFile(context, movieId)
+        isLoading = false
     }
     
-    // Directly render content without Scaffold since it's already in MainScreen's Scaffold
-    if (movie != null) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(CinevexColors.BackgroundOled),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = CinevexColors.AccentRed)
+        }
+    } else if (movie != null) {
         MovieDetailsContent(
             movie = movie!!,
             onBackClick = { navController.popBackStack() },
             onPlayClick = { source ->
-                // Launch video player activity
                 VideoPlayerActivity.start(context, source.url)
             },
-            // Remove any padding from parent Scaffold to use full screen
             modifier = Modifier.fillMaxSize()
         )
     } else {
-        // Show loading or error state
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(CinevexColors.BackgroundOled)
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
                 Text(
-                    text = "Movie not found",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(top = 16.dp)
+                    text = "اطلاعات فیلم یافت نشد",
+                    style = CinevexTypography.TitleLarge,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                GlassButton(
+                    text = "بازگشت",
+                    onClick = { navController.popBackStack() }
                 )
             }
         }

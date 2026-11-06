@@ -78,6 +78,15 @@ import com.farshidrezaei.ccloudplus.data.model.FavoriteGroup
 import com.farshidrezaei.ccloudplus.data.model.FavoriteItem
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
+import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.data.model.toMovie
+import com.farshidrezaei.ccloudplus.data.model.toSeries
+import com.farshidrezaei.ccloudplus.ui.components.MediaCard
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -488,7 +497,9 @@ fun FavoritesScreen(navController: NavController) {
     }
     
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CinevexColors.BackgroundOled)
     ) {
         // Top App Bar
         AnimatedVisibility(
@@ -502,9 +513,18 @@ fun FavoritesScreen(navController: NavController) {
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "بازگشت",
+                        tint = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = selectedGroup?.name ?: stringResource(R.string.favorites),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = CinevexTypography.HeroTitle,
+                    color = Color.White,
                     modifier = Modifier.weight(1f)
                 )
                 
@@ -749,52 +769,41 @@ fun FavoritesScreen(navController: NavController) {
                     )
                 }
                 
-                Card(
+                val isTv = remember { DeviceUtils.isTv(context) }
+                val gridColumns = remember(isTv) {
+                    if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
+                }
+                
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
                         .weight(1f)
-                        .focusable()
-                        .focusRequester(favoritesCardFocusRequester)
-                        .focusProperties {
-                            up = groupCardFocusRequester
-                        },
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+                        .padding(horizontal = 8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {                     
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(0.dp),
-                            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
-                        ) {
-                            items(favorites) { favorite ->
-                                FavoriteItemCard(
-                                    favorite = favorite,
-                                    onClick = {
-                                        // Save the favorite to the appropriate database before navigating
-                                        StorageUtils.saveFavoriteToDatabase(context, favorite)
-                                        
-                                        // Navigate to the appropriate screen based on type
-                                        when (favorite.type) {
-                                            "movie" -> {
-                                                navController.navigate("${AppScreens.SingleMovie.route.replace("{movieId}", favorite.id.toString())}")
-                                            }
-                                            "series" -> {
-                                                navController.navigate("${AppScreens.SingleSeries.route.replace("{seriesId}", favorite.id.toString())}")
-                                            }
-                                        }
-                                    },
-                                    onDelete = {
-                                        favoriteToRemove = favorite
-                                        showRemoveFavoriteDialog = true
-                                    },
-                                    onMoveToGroup = { item ->
-                                        selectedItem = item
-                                        showMoveToGroupDialog = true
+                    LazyVerticalGrid(
+                        columns = gridColumns,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        items(favorites) { favorite ->
+                            MediaCard(
+                                movie = favorite.toMovie(),
+                                onClick = {
+                                    if (favorite.type == "movie") {
+                                        StorageUtils.saveMovieToFile(context, favorite.toMovie())
+                                        navController.navigate(AppScreens.SingleMovie.createRoute(favorite.id))
+                                    } else {
+                                        StorageUtils.saveSeriesToFile(context, favorite.toSeries())
+                                        navController.navigate(AppScreens.SingleSeries.createRoute(favorite.id))
                                     }
-                                )
-                            }
+                                },
+                                onLongClick = {
+                                    favoriteToRemove = favorite
+                                    showRemoveFavoriteDialog = true
+                                }
+                            )
                         }
                     }
                 }

@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -67,6 +68,7 @@ fun GlassBottomNavigation(
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
+                            .weight(1f)
                             .clip(RoundedCornerShape(16.dp))
                             .clickable(
                                 interactionSource = interactionSource,
@@ -82,7 +84,7 @@ fun GlassBottomNavigation(
                                     }
                                 }
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(vertical = 6.dp)
                     ) {
                         screen.icon?.let { icon ->
                             Icon(
@@ -93,12 +95,15 @@ fun GlassBottomNavigation(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
 
                         Text(
                             text = stringResource(screen.resourceId),
                             style = CinevexTypography.LabelSmall,
-                            color = tint
+                            color = tint,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

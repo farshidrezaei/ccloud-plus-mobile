@@ -41,7 +41,9 @@ sealed class AppScreens(
     data object Favorites : AppScreens(
         route = "favorites",
         resourceId = R.string.favorites,
-        icon = Icons.Default.Favorite
+        icon = Icons.Default.Favorite,
+        showBottomBar = false,
+        showSidebar = false
     )
 
     data object Downloads : AppScreens(
@@ -75,11 +77,13 @@ sealed class AppScreens(
     }
 
     data object Country : AppScreens(
-        route = "country",
+        route = "country/{countryId}",
         resourceId = R.string.country,
         showBottomBar = false,
         showSidebar = false
-    )
+    ) {
+        fun createRoute(countryId: Int) = "country/$countryId"
+    }
 
     data object About : AppScreens(
         route = "about",
@@ -93,7 +97,6 @@ sealed class AppScreens(
             Movies,
             Series,
             Search,
-            Favorites,
             Downloads,
             Settings
         )

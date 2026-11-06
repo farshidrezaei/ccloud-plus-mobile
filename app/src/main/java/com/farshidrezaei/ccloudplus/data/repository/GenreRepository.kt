@@ -33,7 +33,7 @@ class GenreRepository : BaseRepository() {
                 val genreObj = jsonArray.getJSONObject(i)
                 val genre = Genre(
                     id = genreObj.optInt("id", 0),
-                    title = genreObj.optString("title", "Unknown")
+                    title = genreObj.optString("title", "نامشخص")
                 )
                 genres.add(genre)
             } catch (e: Exception) {

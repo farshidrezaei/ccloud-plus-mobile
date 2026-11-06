@@ -74,7 +74,10 @@ import com.farshidrezaei.ccloudplus.data.model.Source
 import com.farshidrezaei.ccloudplus.data.model.WatchedEpisode
 import androidx.compose.material.icons.filled.Check
 import com.farshidrezaei.ccloudplus.ui.viewmodel.SeasonsViewModel
-import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
+import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.ui.components.GlassButton
+import androidx.compose.material3.CircularProgressIndicator
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +87,7 @@ fun SingleSeriesScreen(
     navController: NavController
 ) {
     var series by remember { mutableStateOf<Series?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
     val context = LocalContext.current
     val seasonsViewModel: SeasonsViewModel = viewModel()
     var selectedEpisode by remember { mutableStateOf<Episode?>(null) }
@@ -95,6 +99,7 @@ fun SingleSeriesScreen(
     LaunchedEffect(seriesId) {
         series = StorageUtils.loadSeriesFromFile(context, seriesId)
         seasonsViewModel.loadSeasons(seriesId)
+        isLoading = false
     }
     
     // Source selection dialog
@@ -135,8 +140,14 @@ fun SingleSeriesScreen(
         )
     }
     
-    // Directly render content without Scaffold since it's already in MainScreen's Scaffold
-    if (series != null) {
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize().background(CinevexColors.BackgroundOled),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = CinevexColors.AccentRed)
+        }
+    } else if (series != null) {
         SeriesDetailsContent(
             series = series!!,
             seasonsViewModel = seasonsViewModel,
@@ -176,26 +187,26 @@ fun SingleSeriesScreen(
             modifier = Modifier.fillMaxSize()
         )
     } else {
-        // Show loading or error state
         Box(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .background(CinevexColors.BackgroundOled)
+                .padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back"
-                    )
-                }
                 Text(
-                    text = "Series not found",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(top = 16.dp)
+                    text = "اطلاعات سریال یافت نشد",
+                    style = CinevexTypography.TitleLarge,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                GlassButton(
+                    text = "بازگشت",
+                    onClick = { navController.popBackStack() }
                 )
             }
         }

@@ -61,9 +61,9 @@ class SearchRepository : BaseRepository() {
     private fun parsePoster(posterObj: JSONObject): Poster {
         return Poster(
             id = posterObj.optInt("id", 0),
-            title = posterObj.optString("title", "Unknown Title"),
-            type = posterObj.optString("type", ""),
-            description = posterObj.optString("description", "No description available"),
+            title = posterObj.optString("title", "عنوان نامشخص"),
+            type = posterObj.optString("type", "-"),
+            description = posterObj.optString("description", "-"),
             year = posterObj.optInt("year", 0),
             imdb = posterObj.optDouble("imdb", 0.0),
             rating = posterObj.optDouble("rating", 0.0),
@@ -96,7 +96,7 @@ class SearchRepository : BaseRepository() {
                 genres.add(
                     Genre(
                         id = genreObj.optInt("id", 0),
-                        title = genreObj.optString("title", "Unknown")
+                        title = genreObj.optString("title", "نامشخص")
                     )
                 )
             } catch (e: Exception) {
@@ -115,8 +115,8 @@ class SearchRepository : BaseRepository() {
                 sources.add(
                     Source(
                         id = sourceObj.optInt("id", 0),
-                        quality = sourceObj.optString("quality", "Unknown"),
-                        type = sourceObj.optString("type", "Unknown"),
+                        quality = sourceObj.optString("quality", "نامشخص"),
+                        type = sourceObj.optString("type", "نامشخص"),
                         url = sourceObj.optString("url", "")
                     )
                 )
@@ -136,7 +136,7 @@ class SearchRepository : BaseRepository() {
                 countries.add(
                     Country(
                         id = countryObj.optInt("id", 0),
-                        title = countryObj.optString("title", "Unknown"),
+                        title = countryObj.optString("title", "نامشخص"),
                         image = countryObj.optString("image", "")
                     )
                 )

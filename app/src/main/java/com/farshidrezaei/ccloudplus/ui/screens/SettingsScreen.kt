@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.farshidrezaei.ccloudplus.core.config.AppConstants
+import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.core.network.DnsPreset
 import com.farshidrezaei.ccloudplus.core.network.OkHttpClientProvider
 import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
@@ -82,6 +83,60 @@ fun SettingsScreen(
                     text = "تنظیمات برنامه",
                     style = CinevexTypography.HeroTitle
                 )
+            }
+
+            // 0. Favorites & Bookmarks Shortcut
+            item {
+                Text(
+                    text = "مجموعه من",
+                    style = CinevexTypography.TitleMedium,
+                    color = CinevexColors.AccentRed
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                GlassBox(
+                    shape = RoundedCornerShape(16.dp),
+                    backgroundColor = CinevexColors.GlassSurfaceElevated,
+                    onClick = { navController.navigate(AppScreens.Favorites.route) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Favorite,
+                                contentDescription = null,
+                                tint = CinevexColors.AccentRed,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "فیلم‌ها و سریال‌های نشان‌شده",
+                                    style = CinevexTypography.TitleMedium
+                                )
+                                Text(
+                                    text = "مشاهده لیست علاقه‌مندی‌ها و ذخیره‌شده‌ها",
+                                    style = CinevexTypography.LabelSmall,
+                                    color = CinevexColors.TextSecondary
+                                )
+                            }
+                        }
+
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = CinevexColors.TextMuted
+                        )
+                    }
+                }
             }
 
             // 1. Anti-Sanction DNS Section

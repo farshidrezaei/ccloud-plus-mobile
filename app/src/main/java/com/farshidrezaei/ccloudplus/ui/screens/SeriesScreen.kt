@@ -13,8 +13,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import com.farshidrezaei.ccloudplus.ui.components.*
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 import com.farshidrezaei.ccloudplus.ui.viewmodel.SeriesViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeriesScreen(
     navController: NavController,
@@ -76,33 +79,40 @@ fun SeriesScreen(
                 )
             }
             else -> {
-                LazyVerticalGrid(
-                    columns = gridColumns,
-                    contentPadding = PaddingValues(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 16.dp,
-                        bottom = if (isTv) 24.dp else 90.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                PullToRefreshBox(
+                    isRefreshing = isLoading && seriesList.isNotEmpty(),
+                    onRefresh = { viewModel.refresh() },
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    // 1. Featured Hero Carousel
-                    if (featuredSeries.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            FeaturedHeroCarousel(
-                                featuredItems = featuredSeries,
-                                onPlayClick = { movie ->
-                                    navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                                },
-                                onDetailsClick = { movie ->
-                                    navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
-                                },
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
+                    LazyVerticalGrid(
+                        columns = gridColumns,
+                        contentPadding = PaddingValues(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 16.dp,
+                            bottom = if (isTv) 24.dp else 90.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        // 1. Featured Hero Carousel
+                        if (featuredSeries.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                FeaturedHeroCarousel(
+                                    featuredItems = featuredSeries,
+                                    onPlayClick = { movie ->
+                                        seriesList.find { it.id == movie.id }?.let { StorageUtils.saveSeriesToFile(context, it) }
+                                        navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
+                                    },
+                                    onDetailsClick = { movie ->
+                                        seriesList.find { it.id == movie.id }?.let { StorageUtils.saveSeriesToFile(context, it) }
+                                        navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
+                                    },
+                                    modifier = Modifier.padding(bottom = 8.dp)
+                                )
+                            }
                         }
-                    }
 
                     // 2. Genre Chips & Filter Row
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -184,6 +194,7 @@ fun SeriesScreen(
                         MediaCard(
                             movie = series.toMovie(),
                             onClick = {
+                                StorageUtils.saveSeriesToFile(context, series)
                                 navController.navigate(AppScreens.SingleSeries.createRoute(series.id))
                             },
                             onLongClick = {
@@ -211,6 +222,7 @@ fun SeriesScreen(
                 }
             }
         }
+    }
 
         // Preview BottomSheet
         if (previewSeries != null) {
@@ -218,9 +230,11 @@ fun SeriesScreen(
                 movie = previewSeries?.toMovie(),
                 onDismiss = { previewSeries = null },
                 onPlayClick = { movie ->
+                    previewSeries?.let { StorageUtils.saveSeriesToFile(context, it) }
                     navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
                 },
                 onDetailsClick = { movie ->
+                    previewSeries?.let { StorageUtils.saveSeriesToFile(context, it) }
                     navController.navigate(AppScreens.SingleSeries.createRoute(movie.id))
                 },
                 onToggleFavorite = { _ ->

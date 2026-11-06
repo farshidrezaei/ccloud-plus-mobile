@@ -73,6 +73,10 @@ import com.farshidrezaei.ccloudplus.data.model.Poster
 import com.farshidrezaei.ccloudplus.ui.viewmodel.CountryViewModel
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
+import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.ui.components.MediaCard
+import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
 
 @Composable
 fun CountryScreen(
@@ -93,7 +97,9 @@ fun CountryScreen(
     val selectedFilterType = viewModel.selectedFilterType
     
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CinevexColors.BackgroundOled)
     ) {
         // Header with back button and filter icon
         Row(
@@ -105,7 +111,7 @@ fun CountryScreen(
             IconButton(onClick = { navController?.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "بازگشت"
                 )
             }
             
@@ -123,7 +129,7 @@ fun CountryScreen(
                 IconButton(onClick = { filterMenuExpanded = true }) {
                     Icon(
                         imageVector = Icons.Default.FilterList,
-                        contentDescription = "Filter",
+                        contentDescription = "فیلتر",
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -362,28 +368,30 @@ fun CountryPosterGrid(
     val postersList = posters.toList()
     val context = LocalContext.current
     
-    val columns = DeviceUtils.getGridColumns(LocalContext.current.resources)
+    val isTv = remember { DeviceUtils.isTv(context) }
+    val gridColumns = remember(isTv) {
+        if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
+    }
     LazyVerticalGrid(
-        columns = GridCells.Fixed(columns),
-        modifier = Modifier.fillMaxSize(),
+        columns = gridColumns,
+        modifier = Modifier.fillMaxSize().background(CinevexColors.BackgroundOled),
         contentPadding = PaddingValues(16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         itemsIndexed(postersList) { index, poster ->            
-            CountryPosterItem(
-                poster = poster,
+            MediaCard(
+                movie = poster.toMovie(),
                 onClick = {
                     if (poster.isMovie()) {
-                        // Save movie to storage and navigate to single movie screen
                         StorageUtils.saveMovieToFile(context, poster.toMovie())
-                        navController?.navigate("single_movie/${poster.id}")
+                        navController?.navigate(AppScreens.SingleMovie.createRoute(poster.id))
                     } else if (poster.isSeries()) {
-                        // Save series to storage and navigate to single series screen
                         StorageUtils.saveSeriesToFile(context, poster.toSeries())
-                        navController?.navigate("single_series/${poster.id}")
+                        navController?.navigate(AppScreens.SingleSeries.createRoute(poster.id))
                     }
-                }
+                },
+                onLongClick = {}
             )
             
             // Load more when we're near the end of the list

@@ -32,7 +32,7 @@ class CountryRepository : BaseRepository() {
                 countries.add(
                     Country(
                         id = countryObj.optInt("id", 0),
-                        title = countryObj.optString("title", "Unknown"),
+                        title = countryObj.optString("title", "نامشخص"),
                         image = countryObj.optString("image", "")
                     )
                 )

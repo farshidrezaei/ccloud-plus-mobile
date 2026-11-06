@@ -49,7 +49,7 @@ class SeasonsRepository : BaseRepository() {
     private fun parseSeason(seasonObj: JSONObject): Season {
         return Season(
             id = seasonObj.optInt("id", 0),
-            title = seasonObj.optString("title", "Unknown Season"),
+            title = seasonObj.optString("title", "نامشخص"),
             episodes = try {
                 parseEpisodes(seasonObj.getJSONArray("episodes"))
             } catch (e: Exception) {
@@ -66,7 +66,7 @@ class SeasonsRepository : BaseRepository() {
                 episodes.add(
                     Episode(
                         id = episodeObj.optInt("id", 0),
-                        title = episodeObj.optString("title", "Episode ${i + 1}"),
+                        title = episodeObj.optString("title", "اپیزود ${i + 1}"),
                         description = episodeObj.optString("description", ""),
                         duration = episodeObj.optString("duration", null).takeIf { it != "null" },
                         image = episodeObj.optString("image", ""),

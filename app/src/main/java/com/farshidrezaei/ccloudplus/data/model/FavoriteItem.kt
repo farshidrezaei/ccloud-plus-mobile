@@ -50,3 +50,34 @@ fun Series.toFavoriteItem() = FavoriteItem(
     country = country,
     sources = emptyList()
 )
+
+fun FavoriteItem.toMovie() = Movie(
+    id = id,
+    type = type,
+    title = title,
+    description = description,
+    year = year,
+    imdb = imdb,
+    rating = rating,
+    duration = duration,
+    image = image,
+    cover = cover,
+    genres = genres,
+    country = country,
+    sources = sources
+)
+
+fun FavoriteItem.toSeries() = Series(
+    id = id,
+    type = type,
+    title = title,
+    description = description,
+    year = year,
+    imdb = imdb,
+    rating = rating,
+    duration = duration,
+    image = image,
+    cover = cover,
+    genres = genres,
+    country = country
+)

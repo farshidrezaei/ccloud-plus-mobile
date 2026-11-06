@@ -12,17 +12,17 @@ object DownloadUtils {
             context.startActivity(intent)
         } catch (e: Exception) {
             // Show error message when URL cannot be opened
-            android.widget.Toast.makeText(context, "Unable to open URL: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(context, "آدرس مورد نظر باز نشد: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 
     fun copyToClipboard(context: Context, text: String) {
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        val clip = android.content.ClipData.newPlainText("Video URL", text)
+        val clip = android.content.ClipData.newPlainText("آدرس ویدیو", text)
         clipboard.setPrimaryClip(clip)
         
         // Show a toast or snackbar to indicate success
-        android.widget.Toast.makeText(context, "Link copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
+        android.widget.Toast.makeText(context, "لینک در حافظه نهان ذخیره شد.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
     fun openWithADM(context: Context, url: String) {

@@ -8,9 +8,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -50,11 +54,11 @@ fun MainApp() {
     val systemUiController = rememberSystemUiController()
     LaunchedEffect(Unit) {
         systemUiController.setStatusBarColor(
-            color = androidx.compose.ui.graphics.Color.Transparent,
+            color = Color.Transparent,
             darkIcons = false
         )
         systemUiController.setNavigationBarColor(
-            color = androidx.compose.ui.graphics.Color.Transparent,
+            color = Color.Transparent,
             darkIcons = false
         )
     }
@@ -71,27 +75,47 @@ fun MainApp() {
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
-    ) {
-        if (isTv) {
-            Row(modifier = Modifier.fillMaxSize()) {
-                if (currentScreen.showSidebar && currentRoute != AppScreens.Splash.route) {
-                    GlassSidebarNavigation(navController = navController)
+    // Enforce 100% Native RTL Layout
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(CinevexColors.BackgroundOled)
+        ) {
+            if (isTv) {
+                Row(modifier = Modifier.fillMaxSize()) {
+                    if (currentScreen.showSidebar) {
+                        GlassSidebarNavigation(navController = navController)
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        AppNavigation(navController = navController)
+                    }
                 }
-                Box(modifier = Modifier.weight(1f)) {
-                    AppNavigation(navController = navController)
-                }
-            }
-        } else {
-            Box(modifier = Modifier.fillMaxSize()) {
-                AppNavigation(navController = navController)
-
-                if (currentScreen.showBottomBar && currentRoute != AppScreens.Splash.route) {
-                    Box(modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter)) {
-                        GlassBottomNavigation(navController = navController)
+            } else {
+                Scaffold(
+                    containerColor = CinevexColors.BackgroundOled,
+                    contentWindowInsets = WindowInsets.statusBars,
+                    bottomBar = {
+                        if (currentScreen.showBottomBar) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .navigationBarsPadding()
+                            ) {
+                                GlassBottomNavigation(navController = navController)
+                            }
+                        }
+                    }
+                ) { innerPadding ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                top = innerPadding.calculateTopPadding(),
+                                bottom = innerPadding.calculateBottomPadding()
+                            )
+                    ) {
+                        AppNavigation(navController = navController)
                     }
                 }
             }

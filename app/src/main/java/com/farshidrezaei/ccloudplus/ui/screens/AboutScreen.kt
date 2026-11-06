@@ -62,7 +62,7 @@ fun AboutScreen(navController: NavController?) {
             IconButton(onClick = { navController?.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "بازگشت"
                 )
             }
             
@@ -89,7 +89,7 @@ fun AboutScreen(navController: NavController?) {
                     .data(R.drawable.splash_logo)
                     .crossfade(true)
                     .build(),
-                contentDescription = "App Logo",
+                contentDescription = "لوگو",
                 modifier = Modifier.size(120.dp)
             )
             
@@ -106,7 +106,7 @@ fun AboutScreen(navController: NavController?) {
             
             // App Version and Architecture
             Text(
-                text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) - ${getArchitecture()}",
+                text = "نسخه ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) - ${getArchitecture()}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -115,7 +115,7 @@ fun AboutScreen(navController: NavController?) {
             
             // Developer Info
             Text(
-                text = "Developed by Hossein Pira",
+                text = "توسعه یافته توسط Farshid Rezaei",
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
@@ -129,7 +129,7 @@ fun AboutScreen(navController: NavController?) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Connect with us",
+                        text = "تماس با ما",
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
@@ -137,8 +137,8 @@ fun AboutScreen(navController: NavController?) {
                     // GitHub Link
                     LinkItem(
                         icon = Icons.Default.Public,
-                        text = "GitHub Repository",
-                        url = "https://github.com/code3-dev/CCloud"
+                        text = "گیت‌هاب",
+                        url = "https://github.com/farshidrezaei/ccloud-plus-mobile"
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -146,8 +146,8 @@ fun AboutScreen(navController: NavController?) {
                     // Telegram Channel Link
                     LinkItem(
                         icon = Icons.Default.Send,
-                        text = "Telegram Channel",
-                        url = "https://t.me/irdevs_dns"
+                        text = "کانال تلگرام",
+                        url = "https://t.me/farshidcodes"
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -155,8 +155,8 @@ fun AboutScreen(navController: NavController?) {
                     // Developer Telegram Link
                     LinkItem(
                         icon = Icons.Default.Send,
-                        text = "Developer Telegram",
-                        url = "https://t.me/h3dev"
+                        text = "تلگرام من",
+                        url = "https://t.me/farshidrezaeii"
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -164,49 +164,15 @@ fun AboutScreen(navController: NavController?) {
                     // Developer Email Link
                     LinkItem(
                         icon = Icons.Default.Email,
-                        text = "Developer Email",
-                        url = "h3dev.pira@gmail.com",
+                        text = "ایمیل",
+                        url = "farshid.net1@gmail.com",
                         isEmail = true
                     )
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Donation Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Support Us",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    
-                    Text(
-                        text = "If you find CCloud useful, consider supporting the development with a donation.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    
-                    // Tron Address (TRX)
-                    DonationItem(
-                        coinName = "Tron (TRX)",
-                        address = "TZDVavXKzfgpAX7NFVh8h2KY3XWCbNEyEe"
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    // Bitcoin Address (BTC)
-                    DonationItem(
-                        coinName = "Bitcoin (BTC)",
-                        address = "bc1q74l58mhmtwgk4ygr3l0zyv53fgxdajp28tvrld"
-                    )
-                }
-            }
+
             
             Spacer(modifier = Modifier.height(24.dp))
             
@@ -270,7 +236,7 @@ fun LinkItem(
         
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-            contentDescription = "Open link",
+            contentDescription = "باز کردن",
             modifier = Modifier
                 .size(24.dp)
                 .graphicsLayer(rotationZ = 180f)
@@ -278,52 +244,6 @@ fun LinkItem(
     }
 }
 
-@Composable
-fun DonationItem(
-    coinName: String,
-    address: String
-) {
-    val context = LocalContext.current
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable {
-                // Copy address to clipboard
-                val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                val clip = android.content.ClipData.newPlainText("$coinName Address", address)
-                clipboard.setPrimaryClip(clip)
-                
-                // Show toast
-                android.widget.Toast.makeText(context, "$coinName address copied to clipboard", android.widget.Toast.LENGTH_SHORT).show()
-            }
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = coinName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = address,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        
-        Icon(
-            imageVector = Icons.Default.ContentCopy,
-            contentDescription = "Copy address",
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
 
 fun getArchitecture(): String {
     return try {

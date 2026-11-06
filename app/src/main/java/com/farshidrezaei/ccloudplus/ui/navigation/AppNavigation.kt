@@ -16,21 +16,10 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppScreens.Splash.route,
+        startDestination = AppScreens.Movies.route,
         enterTransition = { fadeIn() },
         exitTransition = { fadeOut() }
     ) {
-        composable(AppScreens.Splash.route) {
-            SplashScreen(
-                onTimeout = {
-                    navController.navigate(AppScreens.Movies.route) {
-                        popUpTo(AppScreens.Splash.route) { inclusive = true }
-                    }
-                },
-                backgroundColor = com.farshidrezaei.ccloudplus.core.theme.CinevexColors.BackgroundOled
-            )
-        }
-
         composable(AppScreens.Movies.route) {
             MoviesScreen(navController = navController)
         }
@@ -59,8 +48,12 @@ fun AppNavigation(
             AboutScreen(navController = navController)
         }
 
-        composable(AppScreens.Country.route) {
-            CountryScreen(navController = navController)
+        composable(
+            route = AppScreens.Country.route,
+            arguments = listOf(navArgument("countryId") { type = NavType.IntType; defaultValue = 0 })
+        ) { backStackEntry ->
+            val countryId = backStackEntry.arguments?.getInt("countryId") ?: 0
+            CountryScreen(countryId = countryId, navController = navController)
         }
 
         composable(
