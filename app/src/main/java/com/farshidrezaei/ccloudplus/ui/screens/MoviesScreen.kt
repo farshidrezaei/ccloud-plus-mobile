@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
 import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
@@ -63,7 +64,7 @@ fun MoviesScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CCloudColors.BackgroundOled)
+            .background(CCloudTheme.colors.background)
     ) {
         when {
             isLoading && movies.isEmpty() -> {

@@ -28,8 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.Movie
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -54,14 +54,14 @@ fun MediaCard(
             .scale(scale)
             .then(
                 if (isFocused) {
-                    Modifier.shadow(16.dp, RoundedCornerShape(14.dp), spotColor = CinevexColors.AccentRedGlow)
+                    Modifier.shadow(16.dp, RoundedCornerShape(14.dp), spotColor = CCloudColors.AccentRedGlow)
                 } else Modifier
             )
             .clip(RoundedCornerShape(14.dp))
-            .background(CinevexColors.GlassSurface)
+            .background(CCloudColors.GlassSurface)
             .border(
                 if (isFocused) 2.dp else 1.dp,
-                if (isFocused) CinevexColors.GlassBorderFocus else CinevexColors.GlassBorder,
+                if (isFocused) CCloudColors.GlassBorderFocus else CCloudColors.GlassBorder,
                 RoundedCornerShape(14.dp)
             )
             .combinedClickable(
@@ -103,12 +103,12 @@ fun MediaCard(
                     Icon(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
-                        tint = CinevexColors.RatingGold,
+                        tint = CCloudColors.RatingGold,
                         modifier = Modifier.size(11.dp)
                     )
                     Text(
                         text = String.format("%.1f", movie.imdb),
-                        style = CinevexTypography.BadgeText,
+                        style = CCloudTypography.BadgeText,
                         color = Color.White
                     )
                 }
@@ -126,8 +126,8 @@ fun MediaCard(
                 ) {
                     Text(
                         text = "${movie.year}",
-                        style = CinevexTypography.BadgeText,
-                        color = CinevexColors.TextSecondary
+                        style = CCloudTypography.BadgeText,
+                        color = CCloudColors.TextSecondary
                     )
                 }
             }
@@ -138,7 +138,7 @@ fun MediaCard(
         // Title
         Text(
             text = movie.title,
-            style = CinevexTypography.TitleMedium,
+            style = CCloudTypography.TitleMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 4.dp)
@@ -150,8 +150,8 @@ fun MediaCard(
         if (movie.genres.isNotEmpty()) {
             Text(
                 text = movie.genres.take(2).joinToString(" • ") { it.title },
-                style = CinevexTypography.LabelSmall,
-                color = CinevexColors.TextMuted,
+                style = CCloudTypography.LabelSmall,
+                color = CCloudColors.TextMuted,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(horizontal = 4.dp)

@@ -47,7 +47,7 @@ fun GlassBottomNavigation(
             modifier = Modifier
                 .shadow(20.dp, RoundedCornerShape(26.dp), spotColor = Color.Black)
                 .clip(RoundedCornerShape(26.dp))
-                .background(Color(0xE613151B))
+                .background(if (CCloudTheme.colors.isDark) Color(0xE613151B) else Color(0xF2FFFFFF))
                 .border(1.dp, CCloudColors.GlassBorder, RoundedCornerShape(26.dp))
                 .padding(horizontal = 8.dp, vertical = 6.dp)
         ) {
@@ -78,10 +78,10 @@ fun GlassBottomNavigation(
                                 if (currentRoute != screen.route) {
                                     navController.navigate(screen.route) {
                                         popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                            saveState = (screen.route != AppScreens.Home.route)
                                         }
                                         launchSingleTop = true
-                                        restoreState = true
+                                        restoreState = (screen.route != AppScreens.Home.route)
                                     }
                                 }
                             }

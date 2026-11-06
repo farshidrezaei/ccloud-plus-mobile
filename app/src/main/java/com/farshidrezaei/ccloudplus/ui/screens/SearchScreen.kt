@@ -71,8 +71,9 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.farshidrezaei.ccloudplus.R
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.ui.components.MediaCard
 import com.farshidrezaei.ccloudplus.ui.components.GlassButton
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
@@ -98,7 +99,7 @@ fun SearchScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
+            .background(CCloudTheme.colors.background)
             .padding(16.dp)
     ) {
         // Search bar
@@ -114,7 +115,7 @@ fun SearchScreen(
             placeholder = { 
                 Text(
                     text = "جستجوی فیلم و سریال...",
-                    color = CinevexColors.TextSecondary
+                    color = CCloudColors.TextSecondary
                 ) 
             },
             leadingIcon = {
@@ -127,7 +128,7 @@ fun SearchScreen(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "جستجو",
-                        tint = CinevexColors.AccentRed
+                        tint = CCloudColors.AccentRed
                     )
                 }
             },
@@ -140,7 +141,7 @@ fun SearchScreen(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "پاک کردن",
-                            tint = CinevexColors.TextSecondary
+                            tint = CCloudColors.TextSecondary
                         )
                     }
                 }
@@ -160,8 +161,8 @@ fun SearchScreen(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
-                focusedContainerColor = CinevexColors.GlassSurfaceElevated,
-                unfocusedContainerColor = CinevexColors.GlassSurface,
+                focusedContainerColor = CCloudColors.GlassSurfaceElevated,
+                unfocusedContainerColor = CCloudColors.GlassSurface,
                 focusedTextColor = Color.White,
                 unfocusedTextColor = Color.White
             ),
@@ -180,7 +181,7 @@ fun SearchScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = CinevexColors.AccentRed
+                        color = CCloudColors.AccentRed
                     )
                 }
             } else if (viewModel.countries.isNotEmpty()) {
@@ -213,7 +214,7 @@ fun SearchScreen(
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(40.dp),
-                        color = CinevexColors.AccentRed
+                        color = CCloudColors.AccentRed
                     )
                 }
             }
@@ -227,8 +228,8 @@ fun SearchScreen(
                     ) {
                         Text(
                             text = "خطا: ${viewModel.errorMessage}",
-                            style = CinevexTypography.BodyMedium,
-                            color = CinevexColors.AccentRed
+                            style = CCloudTypography.BodyMedium,
+                            color = CCloudColors.AccentRed
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         GlassButton(
@@ -252,8 +253,8 @@ fun SearchScreen(
                 ) {
                     Text(
                         text = "نتیجه‌ای یافت نشد",
-                        style = CinevexTypography.TitleMedium,
-                        color = CinevexColors.TextSecondary
+                        style = CCloudTypography.TitleMedium,
+                        color = CCloudColors.TextSecondary
                     )
                 }
             }

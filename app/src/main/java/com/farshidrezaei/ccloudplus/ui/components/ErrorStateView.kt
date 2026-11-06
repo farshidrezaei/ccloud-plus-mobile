@@ -13,8 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.farshidrezaei.ccloudplus.core.error.AppError
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 
 @Composable
 fun ErrorStateView(
@@ -32,7 +32,7 @@ fun ErrorStateView(
     ) {
         GlassBox(
             modifier = Modifier.fillMaxWidth(0.9f),
-            backgroundColor = CinevexColors.GlassSurfaceElevated
+            backgroundColor = CCloudColors.GlassSurfaceElevated
         ) {
             Column(
                 modifier = Modifier
@@ -44,7 +44,7 @@ fun ErrorStateView(
                 Icon(
                     imageVector = Icons.Default.WifiOff,
                     contentDescription = null,
-                    tint = CinevexColors.AccentRed,
+                    tint = CCloudColors.AccentRed,
                     modifier = Modifier.size(52.dp)
                 )
 
@@ -52,25 +52,25 @@ fun ErrorStateView(
 
                 Text(
                     text = "ارتباط با مشکل مواجه شد",
-                    style = CinevexTypography.TitleLarge,
-                    color = CinevexColors.TextPrimary
+                    style = CCloudTypography.TitleLarge,
+                    color = CCloudColors.TextPrimary
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = message,
-                    style = CinevexTypography.BodyMedium,
+                    style = CCloudTypography.BodyMedium,
                     textAlign = TextAlign.Center,
-                    color = CinevexColors.TextSecondary
+                    color = CCloudColors.TextSecondary
                 )
 
                 if (error?.technicalMessage != null) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "کد خطا: ${error.technicalMessage}",
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextMuted
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextMuted
                     )
                 }
 

@@ -21,6 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.farshidrezaei.ccloudplus.core.theme.AppThemeMode
 import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
 import com.farshidrezaei.ccloudplus.core.theme.ThemeManager
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.ui.navigation.AppNavigation
@@ -41,7 +42,9 @@ class MainActivity : ComponentActivity() {
         }
         
         setContent {
-            MainApp()
+            CCloudTheme {
+                MainApp()
+            }
         }
     }
 }

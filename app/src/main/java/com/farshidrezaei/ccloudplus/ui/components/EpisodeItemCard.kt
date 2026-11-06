@@ -18,8 +18,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.Episode
 
 @Composable
@@ -31,8 +31,8 @@ fun EpisodeItemCard(
 ) {
     GlassBox(
         shape = RoundedCornerShape(14.dp),
-        backgroundColor = if (isWatched) CinevexColors.GlassSurface else CinevexColors.GlassSurfaceElevated,
-        borderColor = if (isWatched) CinevexColors.SuccessGreen.copy(alpha = 0.4f) else CinevexColors.GlassBorder,
+        backgroundColor = if (isWatched) CCloudColors.GlassSurface else CCloudColors.GlassSurfaceElevated,
+        borderColor = if (isWatched) CCloudColors.SuccessGreen.copy(alpha = 0.4f) else CCloudColors.GlassBorder,
         onClick = { onPlayClick(episode) },
         modifier = modifier.fillMaxWidth()
     ) {
@@ -84,7 +84,7 @@ fun EpisodeItemCard(
                 ) {
                     Text(
                         text = episode.title,
-                        style = CinevexTypography.TitleMedium,
+                        style = CCloudTypography.TitleMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -94,7 +94,7 @@ fun EpisodeItemCard(
                         Icon(
                             imageVector = Icons.Default.CheckCircle,
                             contentDescription = "دیده شده",
-                            tint = CinevexColors.SuccessGreen,
+                            tint = CCloudColors.SuccessGreen,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -103,8 +103,8 @@ fun EpisodeItemCard(
                 if (episode.description.isNotBlank()) {
                     Text(
                         text = episode.description,
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextSecondary,
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextSecondary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -113,8 +113,8 @@ fun EpisodeItemCard(
                 if (!episode.duration.isNullOrBlank()) {
                     Text(
                         text = episode.duration,
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextMuted
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextMuted
                     )
                 }
             }

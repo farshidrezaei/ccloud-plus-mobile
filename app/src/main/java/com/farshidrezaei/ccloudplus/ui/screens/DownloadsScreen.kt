@@ -20,8 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.player.VideoPlayerActivity
 import com.farshidrezaei.ccloudplus.ui.components.GlassBox
@@ -68,7 +69,7 @@ fun DownloadsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
+            .background(CCloudTheme.colors.background)
             .padding(
                 start = 20.dp,
                 end = 20.dp,
@@ -85,14 +86,14 @@ fun DownloadsScreen(
             ) {
                 Text(
                     text = "دانلودها و کش محلی",
-                    style = CinevexTypography.HeroTitle
+                    style = CCloudTypography.HeroTitle
                 )
 
                 if (downloadedFiles.isNotEmpty()) {
                     Text(
                         text = "پاکسازی همه",
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.AccentRed,
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.AccentRed,
                         modifier = Modifier.padding(8.dp)
                     )
                 }
@@ -114,20 +115,20 @@ fun DownloadsScreen(
                         Icon(
                             imageVector = Icons.Default.Download,
                             contentDescription = null,
-                            tint = CinevexColors.TextMuted,
+                            tint = CCloudColors.TextMuted,
                             modifier = Modifier.size(64.dp)
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "هیچ فایل دانلود شده یا کش محلی وجود ندارد",
-                            style = CinevexTypography.TitleMedium,
-                            color = CinevexColors.TextSecondary
+                            style = CCloudTypography.TitleMedium,
+                            color = CCloudColors.TextSecondary
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = "فیلم‌ها و قسمت‌های پخش‌شده برای تماشای بدون وقفه و آفلاین به طور خودکار کش می‌شوند.",
-                            style = CinevexTypography.LabelSmall,
-                            color = CinevexColors.TextMuted
+                            style = CCloudTypography.LabelSmall,
+                            color = CCloudColors.TextMuted
                         )
                     }
                 }
@@ -140,7 +141,7 @@ fun DownloadsScreen(
                         val sizeMb = item.sizeBytes / (1024 * 1024)
                         GlassBox(
                             shape = RoundedCornerShape(14.dp),
-                            backgroundColor = CinevexColors.GlassSurfaceElevated,
+                            backgroundColor = CCloudColors.GlassSurfaceElevated,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
@@ -158,20 +159,20 @@ fun DownloadsScreen(
                                     Icon(
                                         imageVector = Icons.Default.Folder,
                                         contentDescription = null,
-                                        tint = CinevexColors.AccentRed,
+                                        tint = CCloudColors.AccentRed,
                                         modifier = Modifier.size(28.dp)
                                     )
 
                                     Column {
                                         Text(
                                             text = item.name,
-                                            style = CinevexTypography.TitleMedium,
+                                            style = CCloudTypography.TitleMedium,
                                             maxLines = 1
                                         )
                                         Text(
                                             text = "$sizeMb مگابایت",
-                                            style = CinevexTypography.LabelSmall,
-                                            color = CinevexColors.TextSecondary
+                                            style = CCloudTypography.LabelSmall,
+                                            color = CCloudColors.TextSecondary
                                         )
                                     }
                                 }

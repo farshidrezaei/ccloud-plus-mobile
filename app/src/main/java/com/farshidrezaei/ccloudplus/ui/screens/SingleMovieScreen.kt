@@ -3,623 +3,726 @@ package com.farshidrezaei.ccloudplus.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.farshidrezaei.ccloudplus.player.VideoPlayerActivity
-import com.farshidrezaei.ccloudplus.ui.components.DownloadOptionsDialog
-import com.farshidrezaei.ccloudplus.ui.components.ExpandableText
-import com.farshidrezaei.ccloudplus.data.model.FavoriteItem
+import coil.compose.AsyncImage
+import com.farshidrezaei.ccloudplus.R
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
+import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
+import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
 import com.farshidrezaei.ccloudplus.data.model.Movie
 import com.farshidrezaei.ccloudplus.data.model.Source
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
-import com.farshidrezaei.ccloudplus.ui.components.GlassButton
-import androidx.compose.material3.CircularProgressIndicator
-import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
-import com.farshidrezaei.ccloudplus.core.utils.DownloadUtils
+import com.farshidrezaei.ccloudplus.data.model.toFavoriteItem
+import com.farshidrezaei.ccloudplus.player.VideoPlayerActivity
 
-@OptIn(ExperimentalMaterial3Api::class)
+private enum class MovieDetailTab(val title: String) {
+    ABOUT("درباره فیلم"),
+    QUALITIES("کیفیت‌های پخش"),
+    SPECS("مشخصات")
+}
+
 @Composable
 fun SingleMovieScreen(
     movieId: Int,
     navController: NavController
 ) {
+    val context = LocalContext.current
     var movie by remember { mutableStateOf<Movie?>(null) }
     var isLoading by remember { mutableStateOf(true) }
-    val context = LocalContext.current
-    
+
     LaunchedEffect(movieId) {
         movie = StorageUtils.loadMovieFromFile(context, movieId)
         isLoading = false
     }
-    
-    if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(CinevexColors.BackgroundOled),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(color = CinevexColors.AccentRed)
-        }
-    } else if (movie != null) {
-        MovieDetailsContent(
-            movie = movie!!,
-            onBackClick = { navController.popBackStack() },
-            onPlayClick = { source ->
-                VideoPlayerActivity.start(context, source.url)
-            },
-            modifier = Modifier.fillMaxSize()
-        )
-    } else {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(CinevexColors.BackgroundOled)
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "اطلاعات فیلم یافت نشد",
-                    style = CinevexTypography.TitleLarge,
-                    color = Color.White
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CCloudTheme.colors.background)
+    ) {
+        when {
+            isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = CCloudColors.AccentRed)
+                }
+            }
+            movie != null -> {
+                MovieDetailContent(
+                    movie = movie!!,
+                    onBackClick = { navController.popBackStack() },
+                    onPlaySource = { source ->
+                        val intent = Intent(context, VideoPlayerActivity::class.java).apply {
+                            putExtra("video_url", source.url)
+                            putExtra("video_title", "${movie!!.title} (${source.quality})")
+                            putExtra("media_id", movie!!.id)
+                            putExtra("media_type", "movie")
+                            putExtra("media_poster", movie!!.image)
+                        }
+                        context.startActivity(intent)
+                    }
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                GlassButton(
-                    text = "بازگشت",
-                    onClick = { navController.popBackStack() }
-                )
+            }
+            else -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = "اطلاعات فیلم یافت نشد",
+                            style = CCloudTypography.TitleLarge,
+                            color = CCloudTheme.colors.textPrimary
+                        )
+                        Button(
+                            onClick = { navController.popBackStack() },
+                            colors = ButtonDefaults.buttonColors(containerColor = CCloudColors.AccentRed),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("بازگشت", color = Color.White)
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun MovieDetailsContent(
+private fun MovieDetailContent(
     movie: Movie,
     onBackClick: () -> Unit,
-    onPlayClick: (Source) -> Unit,
-    modifier: Modifier = Modifier
+    onPlaySource: (Source) -> Unit
 ) {
     val context = LocalContext.current
-    val layoutDirection = LocalLayoutDirection.current
-    var selectedSource by remember { mutableStateOf<Source?>(null) }
-    var showSourceDialog by remember { mutableStateOf(false) }
-    
-    // Source selection dialog
-    if (showSourceDialog && selectedSource != null) {
-        SourceOptionsDialog(
-            source = selectedSource!!,
-            onDismiss = { showSourceDialog = false },
-            onDownload = { source ->
-                showSourceDialog = false
-                DownloadUtils.openUrl(context, source.url)
-            },
-            onPlay = { source ->
-                showSourceDialog = false
-                onPlayClick(source)
-            }
-        )
+    var selectedTab by remember { mutableStateOf(MovieDetailTab.ABOUT) }
+    var isDescriptionExpanded by remember { mutableStateOf(false) }
+    var isFavorite by remember { mutableStateOf(StorageUtils.isFavorite(context, movie.id, "movie")) }
+
+    val defaultSource = remember(movie.sources) {
+        movie.sources.firstOrNull { it.url.isNotBlank() }
     }
-    
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        // Movie header with background cover and foreground image
+        // 1. Cinematic Hero Header with Backdrop
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(300.dp)
+                .height(380.dp)
         ) {
-            // Background cover image (blurred)
-            Image(
-                painter = rememberAsyncImagePainter(
-                    ImageRequest.Builder(LocalContext.current)
-                        .data(movie.cover)
-                        .crossfade(true)
-                        .build()
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surface),
-                contentScale = ContentScale.Crop
+            // Backdrop Image
+            AsyncImage(
+                model = if (movie.cover.isNotBlank()) movie.cover else movie.image,
+                contentDescription = movie.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
-            
-            // Gradient overlay for better text visibility
+
+            // Deep Vignette Gradient
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                        Brush.verticalGradient(
                             colors = listOf(
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                                MaterialTheme.colorScheme.surface
+                                Color(0x99000000),
+                                Color.Transparent,
+                                CCloudTheme.colors.background.copy(alpha = 0.85f),
+                                CCloudTheme.colors.background
                             )
                         )
                     )
             )
-            
-            // Row to contain poster and movie details side by side
+
+            // Top Bar Icons: Back + CCloud+ Logo + Favorite
             Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.Bottom
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .align(Alignment.TopCenter),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Foreground movie poster
-                var showImageDialog by remember { mutableStateOf(false) }
-                
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(movie.image)
-                            .crossfade(true)
-                            .build()
-                    ),
-                    contentDescription = movie.title,
+                // Back Button
+                IconButton(
+                    onClick = onBackClick,
                     modifier = Modifier
-                        .height(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { showImageDialog = true },
-                    contentScale = ContentScale.Fit
-                )
-                
-                // Image URL dialog
-                if (showImageDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showImageDialog = false },
-                        title = { Text("اقدامات تصویر") },
-                        text = { Text("اقدام مورد نظر رو انتخاب کنید") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    DownloadUtils.copyToClipboard(context, movie.image)
-                                    showImageDialog = false
-                                }
-                            ) {
-                                Text("کپی آدرس تصویر")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(
-                                onClick = { showImageDialog = false }
-                            ) {
-                                Text("انصراف")
-                            }
-                        }
-                    )
-                }
-                
-                // Movie details to the right of the poster
-                Column(
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                        .weight(1f)
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x66000000))
+                        .border(1.dp, Color(0x33FFFFFF), CircleShape)
                 ) {
-                    // Movie title
-                    Text(
-                        text = movie.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "بازگشت",
+                        tint = Color.White,
+                        modifier = Modifier.size(22.dp)
                     )
-                    
-                    // Country and year
-                    val countryText = if (movie.country.isNotEmpty()) {
-                        "${movie.country.joinToString(", ") { it.title }} (${movie.year})"
-                    } else {
-                        "(${movie.year})"
-                    }
-                    
-                    Text(
-                        text = countryText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    // Rating
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "امتیاز",
-                            tint = Color.Yellow,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        Text(
-                            text = String.format("%.1f", movie.imdb),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
                 }
-            }
-            
-            // Back button
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.TopStart)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "بازگشت",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            
-            // Favorite button
-            var isFavorite by remember { mutableStateOf(false) }
-            val context = LocalContext.current
-            val movieId = movie.id
-            
-            // Check if movie is already favorite
-            LaunchedEffect(movieId) {
-                isFavorite = StorageUtils.isFavorite(context, movieId, "movie")
-            }
-            
-            var showRemoveFavoriteDialog by remember { mutableStateOf(false) }
-            
-            // Confirmation dialog for removing from favorites
-            if (showRemoveFavoriteDialog) {
-                AlertDialog(
-                    onDismissRequest = { showRemoveFavoriteDialog = false },
-                    title = { Text("حذف از علاقه‌مندی‌ها") },
-                    text = { Text("آیا میخواهید از لیست علاقه‌مندی ها حذف شود؟") },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                StorageUtils.removeFavorite(context, movieId, "movie")
-                                isFavorite = false
-                                showRemoveFavoriteDialog = false
-                                // Show toast
-                                android.widget.Toast.makeText(context, "حذف از علاقه‌مندی ها", android.widget.Toast.LENGTH_SHORT).show()
-                            }
-                        ) {
-                            Text("حذف")
+
+                // Official CCloud+ App Logo in Header
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = "CCloud+",
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                    )
+                    Text(
+                        text = "CCLOUD+",
+                        style = CCloudTypography.TitleMedium.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        ),
+                        color = Color.White
+                    )
+                }
+
+                // Favorite Toggle Button
+                IconButton(
+                    onClick = {
+                        if (isFavorite) {
+                            StorageUtils.removeFavorite(context, movie.id, "movie")
+                            isFavorite = false
+                            Toast.makeText(context, "از نشان‌شده‌ها حذف شد", Toast.LENGTH_SHORT).show()
+                        } else {
+                            StorageUtils.saveFavorite(context, movie.toFavoriteItem())
+                            isFavorite = true
+                            Toast.makeText(context, "به نشان‌شده‌ها افزوده شد", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    dismissButton = {
-                        TextButton(
-                            onClick = { showRemoveFavoriteDialog = false }
-                        ) {
-                            Text("انصراف")
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x66000000))
+                        .border(1.dp, Color(0x33FFFFFF), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "نشان کردن",
+                        tint = if (isFavorite) CCloudColors.AccentRed else Color.White,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Bottom Hero Content: Poster + Title + Info
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .align(Alignment.BottomStart),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                // Movie Poster Thumbnail
+                Box(
+                    modifier = Modifier
+                        .width(105.dp)
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Color(0x33FFFFFF), RoundedCornerShape(12.dp))
+                ) {
+                    AsyncImage(
+                        model = movie.image,
+                        contentDescription = movie.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                // Info Column
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = movie.title,
+                        style = CCloudTypography.TitleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        ),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    // Country & Year
+                    val countryYearText = buildString {
+                        if (movie.country.isNotEmpty()) {
+                            append(movie.country.joinToString("، ") { it.title })
+                            append(" • ")
+                        }
+                        if (movie.year > 0) {
+                            append(movie.year)
                         }
                     }
-                )
-            }
-            
-            IconButton(
-                onClick = {
-                    if (isFavorite) {
-                        // Show confirmation dialog instead of directly removing
-                        showRemoveFavoriteDialog = true
-                    } else {
-                        // Convert movie to favorite item with sources
-                        val favoriteItem = FavoriteItem(
-                            id = movie.id,
-                            type = "movie",
-                            title = movie.title,
-                            description = movie.description,
-                            year = movie.year,
-                            imdb = movie.imdb,
-                            rating = movie.rating,
-                            duration = movie.duration,
-                            image = movie.image,
-                            cover = movie.cover,
-                            genres = movie.genres,
-                            country = movie.country,
-                            sources = movie.sources // Include sources in favorites
+                    if (countryYearText.isNotBlank()) {
+                        Text(
+                            text = countryYearText,
+                            style = CCloudTypography.BodySmall,
+                            color = CCloudColors.TextSecondary
                         )
-                        StorageUtils.saveFavorite(context, favoriteItem)
-                        isFavorite = true
-                        // Show toast
-                        android.widget.Toast.makeText(context, "افزودن به علاقه‌مندی ها", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+
+                    // Rating badge
+                    if (movie.imdb > 0.0) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "امتیاز",
+                                tint = CCloudColors.RatingGold,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = String.format("%.1f", movie.imdb),
+                                style = CCloudTypography.TitleSmall.copy(fontWeight = FontWeight.Bold),
+                                color = CCloudColors.RatingGold
+                            )
+                            Text(
+                                text = "IMDb",
+                                style = CCloudTypography.LabelSmall,
+                                color = CCloudColors.TextMuted
+                            )
+                        }
+                    }
+
+                    // Genres Pills
+                    if (movie.genres.isNotEmpty()) {
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            items(movie.genres) { genre ->
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color(0x33FFFFFF))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = genre.title,
+                                        style = CCloudTypography.LabelSmall,
+                                        color = Color.White
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // 2. Big Primary Action Button: "تماشای فیلم"
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Button(
+                onClick = {
+                    if (defaultSource != null) {
+                        onPlaySource(defaultSource)
+                    } else {
+                        Toast.makeText(context, "لینک پخشی برای این فیلم یافت نشد", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.TopEnd)
+                    .fillMaxWidth()
+                    .height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = CCloudColors.AccentRed
+                ),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "علاقه‌مندی",
-                    tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "پخش",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "تماشای فیلم",
+                        style = CCloudTypography.ButtonText.copy(fontSize = 16.sp),
+                        color = Color.White
+                    )
+                }
+            }
+
+            // Secondary Quick Actions Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Play in External Player (VLC / MX Player)
+                DetailActionPill(
+                    icon = Icons.Default.OpenInNew,
+                    label = "پلیر خارجی",
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        val url = defaultSource?.url ?: ""
+                        if (url.isNotBlank()) {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(Uri.parse(url), "video/*")
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "پلیر خارجی یافت نشد", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "لینک ویدیو موجود نیست", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+
+                // Direct Download with browser / ADM
+                DetailActionPill(
+                    icon = Icons.Default.Download,
+                    label = "دانلود",
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        val url = defaultSource?.url ?: ""
+                        if (url.isNotBlank()) {
+                            DownloadUtils.openUrl(context, url)
+                        } else {
+                            Toast.makeText(context, "لینک دانلود موجود نیست", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                )
+
+                // Copy Stream URL
+                DetailActionPill(
+                    icon = Icons.Default.ContentCopy,
+                    label = "کپی لینک",
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        val url = defaultSource?.url ?: ""
+                        if (url.isNotBlank()) {
+                            DownloadUtils.copyToClipboard(context, url)
+                        } else {
+                            Toast.makeText(context, "لینکی برای کپی وجود ندارد", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
             }
         }
-        
-        // Genres
-        if (movie.genres.isNotEmpty()) {
-            Text(
-                text = "ژانرها",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-            )
-            
-            // Improved genres display with better wrapping and styling
-            LazyRow(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, top = 8.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(movie.genres) { genre ->
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        shape = RoundedCornerShape(50.dp), // More rounded corners
-                        modifier = Modifier
-                            .height(32.dp) // Fixed height for consistency
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 12.dp)
-                        ) {
-                            Text(
-                                text = genre.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontWeight = FontWeight.Medium,
-                                maxLines = 1
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Description
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // 3. Tab Navigation ("درباره فیلم" / "کیفیت‌های پخش" / "مشخصات")
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Description",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        
-        // Set layout direction to RTL for the description text
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-            ExpandableText(
-                text = movie.description,
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp)
-                    .fillMaxWidth()
-            )
-        }
-        
-        // Sources/Quality options
-        if (movie.sources.isNotEmpty()) {
-            Text(
-                text = "Available Qualities",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-            )
-            
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp)
-            ) {
-                movie.sources.forEach { source ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedSource = source
-                                showSourceDialog = true
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            MovieDetailTab.entries.forEach { tab ->
+                val isSelected = selectedTab == tab
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(
+                            if (isSelected) CCloudColors.AccentRed else CCloudTheme.colors.surfaceCard
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (isSelected) CCloudColors.AccentRed else CCloudTheme.colors.glassBorder,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clickable { selectedTab = tab }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = tab.title,
+                        style = CCloudTypography.BodySmall.copy(
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                         ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        color = if (isSelected) Color.White else CCloudTheme.colors.textSecondary
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // 4. Tab Content
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 36.dp)
+        ) {
+            when (selectedTab) {
+                MovieDetailTab.ABOUT -> {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (movie.description.isNotBlank()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(14.dp))
+                                    .background(CCloudTheme.colors.surfaceCard)
+                                    .border(1.dp, CCloudTheme.colors.glassBorder, RoundedCornerShape(14.dp))
+                                    .padding(16.dp)
+                            ) {
+                                Column {
+                                    Text(
+                                        text = "خلاصه داستان",
+                                        style = CCloudTypography.TitleSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = CCloudTheme.colors.textPrimary
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = movie.description,
+                                        style = CCloudTypography.BodyMedium,
+                                        color = CCloudTheme.colors.textSecondary,
+                                        maxLines = if (isDescriptionExpanded) Int.MAX_VALUE else 3,
+                                        overflow = TextOverflow.Ellipsis,
+                                        lineHeight = 22.sp,
+                                        modifier = Modifier.animateContentSize()
+                                    )
+                                    if (movie.description.length > 120) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = if (isDescriptionExpanded) "بستن متن" else "نمایش بیشتر...",
+                                            style = CCloudTypography.LabelSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = CCloudColors.AccentRed,
+                                            modifier = Modifier.clickable {
+                                                isDescriptionExpanded = !isDescriptionExpanded
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                MovieDetailTab.QUALITIES -> {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        if (movie.sources.isEmpty()) {
                             Text(
-                                text = source.quality,
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                text = "هیچ کیفیتی برای این فیلم ثبت نشده است.",
+                                style = CCloudTypography.BodyMedium,
+                                color = CCloudTheme.colors.textMuted
                             )
-                            
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Play",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                        } else {
+                            movie.sources.forEach { source ->
+                                QualityItemCard(
+                                    source = source,
+                                    onPlay = { onPlaySource(source) },
+                                    onDownload = {
+                                        DownloadUtils.openUrl(context, source.url)
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                MovieDetailTab.SPECS -> {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SpecRowCard(title = "مدت زمان", value = if (movie.duration.isNullOrBlank()) "نامشخص" else movie.duration!!)
+                        SpecRowCard(title = "سال تولید", value = if (movie.year > 0) movie.year.toString() else "نامشخص")
+                        SpecRowCard(title = "امتیاز IMDb", value = if (movie.imdb > 0) String.format("%.1f از ۱۰", movie.imdb) else "ثبت نشده")
+                        if (movie.country.isNotEmpty()) {
+                            SpecRowCard(title = "کشور سازنده", value = movie.country.joinToString("، ") { it.title })
                         }
                     }
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
 @Composable
-fun SourceOptionsDialog(
-    source: Source,
-    onDismiss: () -> Unit,
-    onDownload: (Source) -> Unit,
-    onPlay: (Source) -> Unit
+private fun DetailActionPill(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    var showDownloadOptions by remember { mutableStateOf(false) }
-    
-    if (showDownloadOptions) {
-        DownloadOptionsDialog(
-            source = source,
-            onDismiss = { showDownloadOptions = false },
-            onCopyLink = { DownloadUtils.copyToClipboard(context, source.url) },
-            onDownloadWithBrowser = { DownloadUtils.openUrl(context, source.url) },
-            onDownloadWithADM = { DownloadUtils.openWithADM(context, source.url) },
-            onOpenInVLC = { DownloadUtils.openWithVLC(context, source.url) },
-            onOpenInMXPlayer = { DownloadUtils.openWithMXPlayer(context, source.url) },
-            onOpenInKMPlayer = { DownloadUtils.openWithKMPlayer(context, source.url) }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(CCloudTheme.colors.surfaceCard)
+            .border(1.dp, CCloudTheme.colors.glassBorder, RoundedCornerShape(12.dp))
+            .clickable { onClick() }
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                tint = CCloudTheme.colors.textPrimary,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = label,
+                style = CCloudTypography.LabelSmall,
+                color = CCloudTheme.colors.textPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun QualityItemCard(
+    source: Source,
+    onPlay: () -> Unit,
+    onDownload: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(CCloudTheme.colors.surfaceCard)
+            .border(1.dp, CCloudTheme.colors.glassBorder, RoundedCornerShape(14.dp))
+            .clickable { onPlay() }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Red Play Button
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(CCloudColors.AccentRed),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = "پخش",
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            Column {
+                Text(
+                    text = source.quality.ifBlank { "کیفیت استاندارد" },
+                    style = CCloudTypography.BodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = CCloudTheme.colors.textPrimary
+                )
+                Text(
+                    text = "لینک استریم پرسرعت مستقیم",
+                    style = CCloudTypography.LabelSmall,
+                    color = CCloudTheme.colors.textMuted
+                )
+            }
+        }
+
+        // Direct Download Icon Button
+        IconButton(
+            onClick = onDownload,
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .background(Color(0x1AFFFFFF))
+        ) {
+            Icon(
+                imageVector = Icons.Default.Download,
+                contentDescription = "دانلود",
+                tint = CCloudTheme.colors.textPrimary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpecRowCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(CCloudTheme.colors.surfaceCard)
+            .border(1.dp, CCloudTheme.colors.glassBorder, RoundedCornerShape(12.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = CCloudTypography.BodyMedium,
+            color = CCloudTheme.colors.textSecondary
+        )
+        Text(
+            text = value,
+            style = CCloudTypography.BodyMedium.copy(fontWeight = FontWeight.Bold),
+            color = CCloudTheme.colors.textPrimary
         )
     }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = source.quality,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            Text(
-                text = "Choose an action for this video quality",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        confirmButton = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Button(
-                    onClick = { showDownloadOptions = true },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    elevation = androidx.compose.material3.ButtonDefaults.elevatedButtonElevation()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Download",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Download Options")
-                }
-                
-                Button(
-                    onClick = { onPlay(source) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    elevation = androidx.compose.material3.ButtonDefaults.elevatedButtonElevation()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play",
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Play in CCloud")
-                }
-                
-                // Cancel button moved to the bottom of the dialog
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text("Cancel")
-                }
-            }
-        },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(20.dp),
-        tonalElevation = 6.dp
-    )
 }
-
-
-fun openUrl(context: Context, url: String) {
-    DownloadUtils.openUrl(context, url)
-}
-

@@ -31,8 +31,8 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.farshidrezaei.ccloudplus.R
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 
 @Composable
 fun GlassSidebarNavigation(
@@ -47,7 +47,7 @@ fun GlassSidebarNavigation(
             .fillMaxHeight()
             .width(84.dp)
             .background(Color(0xF0090A0E))
-            .border(width = 1.dp, color = CinevexColors.GlassBorder)
+            .border(width = 1.dp, color = CCloudColors.GlassBorder)
             .padding(vertical = 20.dp)
     ) {
         Column(
@@ -81,7 +81,7 @@ fun GlassSidebarNavigation(
                     )
 
                     val tint by animateColorAsState(
-                        targetValue = if (isSelected || isFocused) CinevexColors.AccentRed else CinevexColors.TextSecondary,
+                        targetValue = if (isSelected || isFocused) CCloudColors.AccentRed else CCloudColors.TextSecondary,
                         animationSpec = tween(150),
                         label = "sidebar_tint"
                     )
@@ -92,13 +92,13 @@ fun GlassSidebarNavigation(
                             .size(54.dp)
                             .clip(RoundedCornerShape(14.dp))
                             .background(
-                                if (isSelected) CinevexColors.GlassSurfaceElevated
-                                else if (isFocused) CinevexColors.GlassSurfaceHover
+                                if (isSelected) CCloudColors.GlassSurfaceElevated
+                                else if (isFocused) CCloudColors.GlassSurfaceHover
                                 else Color.Transparent
                             )
                             .border(
                                 width = if (isFocused) 2.dp else if (isSelected) 1.dp else 0.dp,
-                                color = if (isFocused) CinevexColors.GlassBorderFocus else CinevexColors.AccentRed,
+                                color = if (isFocused) CCloudColors.GlassBorderFocus else CCloudColors.AccentRed,
                                 shape = RoundedCornerShape(14.dp)
                             )
                             .clickable(
@@ -144,13 +144,13 @@ fun GlassSidebarNavigation(
                     .size(54.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(
-                        if (isSettingsSelected) CinevexColors.GlassSurfaceElevated
-                        else if (isSettingsFocused) CinevexColors.GlassSurfaceHover
+                        if (isSettingsSelected) CCloudColors.GlassSurfaceElevated
+                        else if (isSettingsFocused) CCloudColors.GlassSurfaceHover
                         else Color.Transparent
                     )
                     .border(
                         width = if (isSettingsFocused) 2.dp else if (isSettingsSelected) 1.dp else 0.dp,
-                        color = if (isSettingsFocused) CinevexColors.GlassBorderFocus else CinevexColors.AccentRed,
+                        color = if (isSettingsFocused) CCloudColors.GlassBorderFocus else CCloudColors.AccentRed,
                         shape = RoundedCornerShape(14.dp)
                     )
                     .clickable(
@@ -165,7 +165,7 @@ fun GlassSidebarNavigation(
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "تنظیمات",
-                    tint = if (isSettingsSelected || isSettingsFocused) CinevexColors.AccentRed else CinevexColors.TextSecondary,
+                    tint = if (isSettingsSelected || isSettingsFocused) CCloudColors.AccentRed else CCloudColors.TextSecondary,
                     modifier = Modifier.size(24.dp)
                 )
             }

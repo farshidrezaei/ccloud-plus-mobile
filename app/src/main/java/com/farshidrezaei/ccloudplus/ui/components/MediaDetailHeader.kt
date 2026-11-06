@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.Genre
 
 @Composable
@@ -52,7 +52,7 @@ fun MediaDetailHeader(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(CinevexColors.HeroVignette)
+                .background(CCloudColors.HeroVignette)
         )
 
         // Content
@@ -100,7 +100,7 @@ fun MediaDetailHeader(
                             Spacer(modifier = Modifier.width(2.dp))
                             Text(
                                 text = String.format("%.1f", imdb),
-                                style = CinevexTypography.BadgeText,
+                                style = CCloudTypography.BadgeText,
                                 color = Color.Black
                             )
                         }
@@ -108,15 +108,15 @@ fun MediaDetailHeader(
 
                     Text(
                         text = "$year",
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextSecondary
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextSecondary
                     )
 
                     if (!duration.isNullOrBlank()) {
                         Text(
                             text = "•  $duration",
-                            style = CinevexTypography.LabelSmall,
-                            color = CinevexColors.TextMuted
+                            style = CCloudTypography.LabelSmall,
+                            color = CCloudColors.TextMuted
                         )
                     }
                 }
@@ -124,7 +124,7 @@ fun MediaDetailHeader(
                 // Title
                 Text(
                     text = title,
-                    style = CinevexTypography.HeroTitle,
+                    style = CCloudTypography.HeroTitle,
                     maxLines = 2
                 )
 
@@ -132,8 +132,8 @@ fun MediaDetailHeader(
                 if (genres.isNotEmpty()) {
                     Text(
                         text = genres.joinToString(" • ") { it.title },
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextSecondary,
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextSecondary,
                         maxLines = 1
                     )
                 }
@@ -163,7 +163,7 @@ fun MediaDetailHeader(
                             Icon(
                                 imageVector = Icons.Default.Favorite,
                                 contentDescription = null,
-                                tint = if (isFavorite) CinevexColors.AccentRed else Color.White,
+                                tint = if (isFavorite) CCloudColors.AccentRed else Color.White,
                                 modifier = Modifier.size(16.dp)
                             )
                         },

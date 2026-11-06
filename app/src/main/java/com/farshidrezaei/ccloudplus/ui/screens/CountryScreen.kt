@@ -1,704 +1,297 @@
 package com.farshidrezaei.ccloudplus.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import com.farshidrezaei.ccloudplus.data.model.FilterType
-import com.farshidrezaei.ccloudplus.data.model.Poster
-import com.farshidrezaei.ccloudplus.ui.viewmodel.CountryViewModel
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.data.model.FilterType
+import com.farshidrezaei.ccloudplus.data.model.Poster
+import com.farshidrezaei.ccloudplus.data.model.toMovie
+import com.farshidrezaei.ccloudplus.ui.components.MediaActionSheet
 import com.farshidrezaei.ccloudplus.ui.components.MediaCard
 import com.farshidrezaei.ccloudplus.ui.navigation.AppScreens
+import com.farshidrezaei.ccloudplus.ui.viewmodel.CountryViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CountryScreen(
     countryId: Int = 0,
     viewModel: CountryViewModel = viewModel(),
     navController: NavController? = null
 ) {
-    // Set the country ID when the screen is first loaded
+    val context = LocalContext.current
+    val isTv = remember { DeviceUtils.isTv(context) }
+
     LaunchedEffect(countryId) {
         viewModel.setCountryId(countryId)
     }
-    
+
     val posters = viewModel.posters
     val countryName = viewModel.countryName
     val isLoading = viewModel.isLoading
     val isLoadingMore = viewModel.isLoadingMore
     val errorMessage = viewModel.errorMessage
     val selectedFilterType = viewModel.selectedFilterType
-    
-    Column(
+
+    var showFilterMenu by remember { mutableStateOf(false) }
+    var selectedPosterForAction by remember { mutableStateOf<Poster?>(null) }
+
+    val gridColumns = remember(isTv) {
+        if (isTv) GridCells.Fixed(6) else GridCells.Fixed(3)
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CinevexColors.BackgroundOled)
-    ) {
-        // Header with back button and filter icon
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = { navController?.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "بازگشت"
-                )
-            }
-            
-            Text(
-                text = countryName,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp)
-            )
-            
-            // Filter icon button
-            var filterMenuExpanded by remember { mutableStateOf(false) }
-            Box {
-                IconButton(onClick = { filterMenuExpanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.FilterList,
-                        contentDescription = "فیلتر",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                
-                DropdownMenu(
-                    expanded = filterMenuExpanded,
-                    onDismissRequest = { filterMenuExpanded = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("پیشفرض") },
-                        onClick = {
-                            viewModel.selectFilterType(FilterType.DEFAULT)
-                            filterMenuExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("سال ساخت") },
-                        onClick = {
-                            viewModel.selectFilterType(FilterType.BY_YEAR)
-                            filterMenuExpanded = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("امتیاز IMDB") },
-                        onClick = {
-                            viewModel.selectFilterType(FilterType.BY_IMDB)
-                            filterMenuExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-        
-        // Show selected filter type
-        if (selectedFilterType != FilterType.DEFAULT) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = when (selectedFilterType) {
-                        FilterType.DEFAULT -> ""
-                        FilterType.BY_YEAR -> "مرتب شده با سال ساخت"
-                        FilterType.BY_IMDB -> "مرتب شده با امیتاز IMDB"
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-        
-        // Content
-        when {
-            isLoading && posters.isEmpty() -> {
-                // Show modern loading animation when initial posters are loading
-                CountryLoadingScreen()
-            }
-            errorMessage != null && posters.isEmpty() -> {
-                CountryErrorScreen(
-                    errorMessage = errorMessage,
-                    onRetry = { viewModel.retry() }
-                )
-            }
-            else -> {
-                CountryPosterGrid(
-                    posters = posters,
-                    isLoading = isLoading,
-                    isLoadingMore = isLoadingMore,
-                    errorMessage = errorMessage,
-                    onRetry = { viewModel.retry() },
-                    onRefresh = { viewModel.refresh() },
-                    onLoadMore = { viewModel.loadMorePosters() },
-                    navController = navController
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CountryLoadingScreen() {
-    val shimmerColor = MaterialTheme.colorScheme.surfaceVariant
-    val shimmerColorShade = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-    
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Add a title while loading
-        Text(
-            text = "در حال بارگیری...",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(16.dp),
-            fontWeight = FontWeight.Bold
-        )
-        
-        AnimatedVisibility(
-            visible = true,
-            enter = fadeIn(initialAlpha = 0.3f),
-            exit = fadeOut()
-        ) {
-            val columns = DeviceUtils.getGridColumns(LocalContext.current.resources)
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columns),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(6) { // Show 6 loading placeholders
-                    CountryShimmerPosterItem(shimmerColor, shimmerColorShade)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun CountryShimmerPosterItem(
-    shimmerColor: Color,
-    shimmerColorShade: Color
-) {
-    val transition = rememberInfiniteTransition(label = "shimmer")
-    val translateAnim by transition.animateFloat(
-        initialValue = -1000f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200)
-        ), label = "shimmer_translate"
-    )
-    
-    val brush = Brush.linearGradient(
-        colors = listOf(
-            shimmerColor,
-            shimmerColorShade,
-            shimmerColor,
-            shimmerColorShade,
-            shimmerColor
-        ),
-        start = Offset.Zero,
-        end = Offset(x = translateAnim, y = translateAnim)
-    )
-    
-    Card(
-        modifier = Modifier
-            .fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        ) {
-            // Poster image shimmer
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(brush)
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Title shimmer
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .height(20.dp)
-                    .background(brush)
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Year shimmer
-            Box(
-                modifier = Modifier
-                    .width(60.dp)
-                    .height(16.dp)
-                    .background(brush)
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Genres shimmer
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.6f)
-                    .height(16.dp)
-                    .background(brush)
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Rating shimmer
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .background(brush)
-                )
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .width(40.dp)
-                        .height(16.dp)
-                        .background(brush)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun CountryPosterGrid(
-    posters: List<Poster>,
-    isLoading: Boolean,
-    isLoadingMore: Boolean,
-    errorMessage: String?,
-    onRetry: () -> Unit,
-    onRefresh: () -> Unit,
-    onLoadMore: () -> Unit,
-    navController: NavController? = null
-) {
-    val postersList = posters.toList()
-    val context = LocalContext.current
-    
-    val isTv = remember { DeviceUtils.isTv(context) }
-    val gridColumns = remember(isTv) {
-        if (isTv) GridCells.Fixed(5) else GridCells.Adaptive(minSize = 150.dp)
-    }
-    LazyVerticalGrid(
-        columns = gridColumns,
-        modifier = Modifier.fillMaxSize().background(CinevexColors.BackgroundOled),
-        contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        itemsIndexed(postersList) { index, poster ->            
-            MediaCard(
-                movie = poster.toMovie(),
-                onClick = {
-                    if (poster.isMovie()) {
-                        StorageUtils.saveMovieToFile(context, poster.toMovie())
-                        navController?.navigate(AppScreens.SingleMovie.createRoute(poster.id))
-                    } else if (poster.isSeries()) {
-                        StorageUtils.saveSeriesToFile(context, poster.toSeries())
-                        navController?.navigate(AppScreens.SingleSeries.createRoute(poster.id))
-                    }
-                },
-                onLongClick = {}
-            )
-            
-            // Load more when we're near the end of the list
-            if (index >= postersList.size - 3) {
-                LaunchedEffect(Unit) {
-                    onLoadMore()
-                }
-            }
-        }
-        
-        if (isLoadingMore) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Modern animated loading indicator
-                    CountryModernCircularProgressIndicator()
-                }
-            }
-        }
-        
-        if (errorMessage != null) {
-            item {
-                CountryErrorItem(
-                    errorMessage = errorMessage,
-                    onRetry = onRetry
-                )
-            }
-        }
-        
-        // Add a small spacer at the bottom to avoid excessive padding
-        item {
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-    }
-}
-
-@Composable
-fun CountryModernCircularProgressIndicator() {
-    val transition = rememberInfiniteTransition(label = "progress")
-    val progress by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000,
-                easing = FastOutSlowInEasing
-            )
-        ), label = "progress_anim"
-    )
-    
-    // Add rotation animation for a more dynamic effect
-    val rotation by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 2000,
-                easing = LinearEasing
-            )
-        ), label = "rotation_anim"
-    )
-    
-    CircularProgressIndicator(
-        progress = progress,
-        modifier = Modifier
-            .size(48.dp)
-            .rotate(rotation), // Add rotation
-        strokeWidth = 4.dp,
-        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-        color = MaterialTheme.colorScheme.primary
-    )
-}
-
-@Composable
-fun CountryPosterItem(
-    poster: Poster,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(310.dp) // Fixed height for all cards
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        )
+            .background(CCloudTheme.colors.background)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp)
+                .statusBarsPadding()
         ) {
-            // Poster image with rating overlay
-            Box {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        ImageRequest.Builder(LocalContext.current)
-                            .data(poster.image)
-                            .crossfade(true)
-                            .build()
-                    ),
-                    contentDescription = poster.title,
+            // Modern Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Back Button
+                IconButton(
+                    onClick = { navController?.popBackStack() },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.Crop
-                )
-                
-                // Rating overlay at top-right corner
-                Card(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(50.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.Black.copy(alpha = 0.7f)
-                    )
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(CCloudTheme.colors.surfaceElevated)
+                        .border(1.dp, CCloudColors.GlassBorder, CircleShape)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "بازگشت",
+                        tint = CCloudTheme.colors.textPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                // Country Title
+                Text(
+                    text = if (countryName.isNotBlank()) countryName else "فیلم‌ها و سریال‌ها",
+                    style = CCloudTypography.TitleLarge,
+                    color = CCloudTheme.colors.textPrimary
+                )
+
+                // Filter button
+                Box {
+                    IconButton(
+                        onClick = { showFilterMenu = true },
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(CCloudTheme.colors.surfaceElevated)
+                            .border(1.dp, CCloudColors.GlassBorder, CircleShape)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Rating",
-                            tint = Color.Yellow,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = String.format("%.1f", poster.imdb),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White,
-                            fontWeight = FontWeight.Medium
+                            imageVector = Icons.Default.FilterList,
+                            contentDescription = "فیلتر",
+                            tint = CCloudTheme.colors.textPrimary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                }
-                
-                // Type indicator at bottom-right corner
-                Card(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(8.dp),
-                    shape = RoundedCornerShape(50.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (poster.isMovie()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary
-                        }
-                    )
-                ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+
+                    DropdownMenu(
+                        expanded = showFilterMenu,
+                        onDismissRequest = { showFilterMenu = false },
+                        modifier = Modifier
+                            .background(CCloudTheme.colors.surfaceElevated)
+                            .border(1.dp, CCloudColors.GlassBorder, RoundedCornerShape(8.dp))
                     ) {
-                        Text(
-                            text = if (poster.isMovie()) "Movie" else "Series",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (poster.isMovie()) {
-                                MaterialTheme.colorScheme.onPrimary
-                            } else {
-                                MaterialTheme.colorScheme.onSecondary
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "پیش‌فرض (جدیدترین)",
+                                    style = CCloudTypography.BodyMedium,
+                                    color = if (selectedFilterType == FilterType.DEFAULT) CCloudColors.AccentRed else CCloudTheme.colors.textPrimary
+                                )
                             },
-                            fontWeight = FontWeight.Medium
+                            onClick = {
+                                viewModel.setFilterType(FilterType.DEFAULT)
+                                showFilterMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "بر اساس سال انتشار",
+                                    style = CCloudTypography.BodyMedium,
+                                    color = if (selectedFilterType == FilterType.BY_YEAR) CCloudColors.AccentRed else CCloudTheme.colors.textPrimary
+                                )
+                            },
+                            onClick = {
+                                viewModel.setFilterType(FilterType.BY_YEAR)
+                                showFilterMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "بر اساس امتیاز IMDb",
+                                    style = CCloudTypography.BodyMedium,
+                                    color = if (selectedFilterType == FilterType.BY_IMDB) CCloudColors.AccentRed else CCloudTheme.colors.textPrimary
+                                )
+                            },
+                            onClick = {
+                                viewModel.setFilterType(FilterType.BY_IMDB)
+                                showFilterMenu = false
+                            }
                         )
                     }
                 }
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Poster details with weight to fill remaining space
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = poster.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = poster.year.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Genres
-                if (poster.genres.isNotEmpty()) {
-                    Text(
-                        text = poster.genres.joinToString(", ") { it.title },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+
+            // Main Content Area
+            when {
+                isLoading && posters.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = CCloudColors.AccentRed)
+                    }
+                }
+                errorMessage != null && posters.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "خطا در دریافت اطلاعات",
+                                style = CCloudTypography.TitleMedium,
+                                color = CCloudTheme.colors.textPrimary
+                            )
+                            Button(
+                                onClick = { viewModel.refresh() },
+                                colors = ButtonDefaults.buttonColors(containerColor = CCloudColors.AccentRed),
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text("تلاش مجدد", style = CCloudTypography.ButtonText)
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    PullToRefreshBox(
+                        isRefreshing = isLoading,
+                        onRefresh = { viewModel.refresh() },
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        LazyVerticalGrid(
+                            columns = gridColumns,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 96.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            itemsIndexed(
+                                items = posters,
+                                key = { index, poster -> "${poster.id}_${poster.type}_$index" }
+                            ) { index, poster ->
+                                if (index >= posters.size - 4 && !isLoadingMore && viewModel.canLoadMore) {
+                                    LaunchedEffect(Unit) {
+                                        viewModel.loadMore()
+                                    }
+                                }
+
+                                MediaCard(
+                                    movie = poster.toMovie(),
+                                    onClick = {
+                                        if (poster.type == "serie" || poster.type == "series") {
+                                            StorageUtils.saveSeriesToFile(context, poster.toSeries())
+                                            navController?.navigate(AppScreens.SingleSeries.createRoute(poster.id))
+                                        } else {
+                                            StorageUtils.saveMovieToFile(context, poster.toMovie())
+                                            navController?.navigate(AppScreens.SingleMovie.createRoute(poster.id))
+                                        }
+                                    },
+                                    onLongClick = {
+                                        selectedPosterForAction = poster
+                                    }
+                                )
+                            }
+
+                            if (isLoadingMore) {
+                                item(span = { GridItemSpan(maxLineSpan) }) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator(
+                                            color = CCloudColors.AccentRed,
+                                            modifier = Modifier.size(28.dp),
+                                            strokeWidth = 2.5.dp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
-@Composable
-fun CountryErrorScreen(
-    errorMessage: String,
-    onRetry: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Failed to load content",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        
-        Text(
-            text = errorMessage,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        
-        Button(
-            onClick = onRetry,
-            modifier = Modifier.padding(top = 8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = "Retry",
-                modifier = Modifier.size(16.dp)
+        // Action Sheet
+        selectedPosterForAction?.let { poster ->
+            MediaActionSheet(
+                item = poster.toMovie(),
+                onDismiss = { selectedPosterForAction = null },
+                onNavigateToDetail = {
+                    val p = poster
+                    selectedPosterForAction = null
+                    if (p.type == "serie" || p.type == "series") {
+                        StorageUtils.saveSeriesToFile(context, p.toSeries())
+                        navController?.navigate(AppScreens.SingleSeries.createRoute(p.id))
+                    } else {
+                        StorageUtils.saveMovieToFile(context, p.toMovie())
+                        navController?.navigate(AppScreens.SingleMovie.createRoute(p.id))
+                    }
+                }
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Retry")
-        }
-    }
-}
-
-@Composable
-fun CountryErrorItem(
-    errorMessage: String,
-    onRetry: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.errorContainer,
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Failed to load more content",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-            
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            
-            Button(
-                onClick = onRetry,
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onErrorContainer,
-                    contentColor = MaterialTheme.colorScheme.errorContainer
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = "Retry",
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Retry")
-            }
         }
     }
 }

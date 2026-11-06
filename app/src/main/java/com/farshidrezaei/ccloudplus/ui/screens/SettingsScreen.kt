@@ -26,6 +26,7 @@ import com.farshidrezaei.ccloudplus.core.network.DnsPreset
 import com.farshidrezaei.ccloudplus.core.network.OkHttpClientProvider
 import com.farshidrezaei.ccloudplus.core.theme.AppThemeMode
 import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
 import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.theme.ThemeManager
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
@@ -78,7 +79,7 @@ fun SettingsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CCloudColors.BackgroundOled)
+            .background(CCloudTheme.colors.background)
             .padding(
                 start = 16.dp,
                 end = 16.dp,

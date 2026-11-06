@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.Movie
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +35,7 @@ fun MediaPreviewModal(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = CinevexColors.SurfaceDark,
+        containerColor = CCloudColors.SurfaceDark,
         scrimColor = Color.Black.copy(alpha = 0.75f),
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         dragHandle = {
@@ -76,7 +76,7 @@ fun MediaPreviewModal(
                 ) {
                     Text(
                         text = movie.title,
-                        style = CinevexTypography.TitleLarge
+                        style = CCloudTypography.TitleLarge
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
@@ -90,39 +90,39 @@ fun MediaPreviewModal(
                             Icon(
                                 imageVector = Icons.Default.Star,
                                 contentDescription = null,
-                                tint = CinevexColors.RatingGold,
+                                tint = CCloudColors.RatingGold,
                                 modifier = Modifier.size(14.dp)
                             )
                             Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = String.format("%.1f", movie.imdb),
-                                style = CinevexTypography.BadgeText,
-                                color = CinevexColors.TextPrimary
+                                style = CCloudTypography.BadgeText,
+                                color = CCloudColors.TextPrimary
                             )
                         }
 
                         Text(
                             text = "•",
-                            style = CinevexTypography.LabelSmall,
-                            color = CinevexColors.TextMuted
+                            style = CCloudTypography.LabelSmall,
+                            color = CCloudColors.TextMuted
                         )
 
                         Text(
                             text = "${movie.year}",
-                            style = CinevexTypography.LabelSmall,
-                            color = CinevexColors.TextSecondary
+                            style = CCloudTypography.LabelSmall,
+                            color = CCloudColors.TextSecondary
                         )
 
                         if (!movie.duration.isNullOrBlank()) {
                             Text(
                                 text = "•",
-                                style = CinevexTypography.LabelSmall,
-                                color = CinevexColors.TextMuted
+                                style = CCloudTypography.LabelSmall,
+                                color = CCloudColors.TextMuted
                             )
                             Text(
                                 text = movie.duration,
-                                style = CinevexTypography.LabelSmall,
-                                color = CinevexColors.TextSecondary
+                                style = CCloudTypography.LabelSmall,
+                                color = CCloudColors.TextSecondary
                             )
                         }
                     }
@@ -132,8 +132,8 @@ fun MediaPreviewModal(
                     // Genres
                     Text(
                         text = movie.genres.joinToString("، ") { it.title },
-                        style = CinevexTypography.LabelSmall,
-                        color = CinevexColors.TextSecondary
+                        style = CCloudTypography.LabelSmall,
+                        color = CCloudColors.TextSecondary
                     )
                 }
             }
@@ -144,7 +144,7 @@ fun MediaPreviewModal(
             if (movie.description.isNotBlank()) {
                 Text(
                     text = movie.description,
-                    style = CinevexTypography.BodyMedium,
+                    style = CCloudTypography.BodyMedium,
                     maxLines = 4
                 )
             }
@@ -181,7 +181,7 @@ fun MediaPreviewModal(
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
-                            tint = if (isFavorite) CinevexColors.AccentRed else Color.White,
+                            tint = if (isFavorite) CCloudColors.AccentRed else Color.White,
                             modifier = Modifier.size(16.dp)
                         )
                     },

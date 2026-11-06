@@ -25,14 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
 
 @Composable
 fun GlassBox(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(16.dp),
-    backgroundColor: Color = CinevexColors.GlassSurface,
-    borderColor: Color = CinevexColors.GlassBorder,
+    backgroundColor: Color = CCloudColors.GlassSurface,
+    borderColor: Color = CCloudColors.GlassBorder,
     borderWidth: Dp = 1.dp,
     enableDpadFocus: Boolean = false,
     onClick: (() -> Unit)? = null,
@@ -48,7 +48,7 @@ fun GlassBox(
     )
 
     val currentBorderColor = if (enableDpadFocus && isFocused) {
-        CinevexColors.GlassBorderFocus
+        CCloudColors.GlassBorderFocus
     } else {
         borderColor
     }
@@ -60,7 +60,7 @@ fun GlassBox(
             .scale(scale)
             .then(
                 if (enableDpadFocus && isFocused) {
-                    Modifier.shadow(16.dp, shape, spotColor = CinevexColors.AccentRedGlow)
+                    Modifier.shadow(16.dp, shape, spotColor = CCloudColors.AccentRedGlow)
                 } else Modifier
             )
             .clip(shape)
@@ -102,20 +102,20 @@ fun GlassButton(
 
     val bgBrush = if (isPrimary) {
         Brush.horizontalGradient(
-            listOf(CinevexColors.AccentRed, CinevexColors.AccentRedHover)
+            listOf(CCloudColors.AccentRed, CCloudColors.AccentRedHover)
         )
     } else {
         Brush.horizontalGradient(
-            listOf(CinevexColors.GlassSurfaceElevated, CinevexColors.GlassSurface)
+            listOf(CCloudColors.GlassSurfaceElevated, CCloudColors.GlassSurface)
         )
     }
 
     val border = if (isFocused) {
-        CinevexColors.GlassBorderFocus
+        CCloudColors.GlassBorderFocus
     } else if (isPrimary) {
-        CinevexColors.AccentRed
+        CCloudColors.AccentRed
     } else {
-        CinevexColors.GlassBorder
+        CCloudColors.GlassBorder
     }
 
     Box(
@@ -143,8 +143,8 @@ fun GlassButton(
             }
             androidx.compose.material3.Text(
                 text = text,
-                style = com.farshidrezaei.ccloudplus.core.theme.CinevexTypography.ButtonText,
-                color = CinevexColors.TextPrimary
+                style = com.farshidrezaei.ccloudplus.core.theme.CCloudTypography.ButtonText,
+                color = CCloudColors.TextPrimary
             )
         }
     }

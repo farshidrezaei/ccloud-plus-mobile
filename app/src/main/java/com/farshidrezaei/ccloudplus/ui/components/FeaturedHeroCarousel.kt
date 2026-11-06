@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.farshidrezaei.ccloudplus.core.config.AppConstants
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.Movie
 import kotlinx.coroutines.delay
 
@@ -92,7 +92,7 @@ fun FeaturedHeroCarousel(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(CinevexColors.HeroVignette)
+                        .background(CCloudColors.HeroVignette)
                 )
 
                 // Content Overlay
@@ -126,7 +126,7 @@ fun FeaturedHeroCarousel(
                                 )
                                 Text(
                                     text = String.format("%.1f", movie.imdb),
-                                    style = CinevexTypography.BadgeText,
+                                    style = CCloudTypography.BadgeText,
                                     color = Color.Black
                                 )
                             }
@@ -135,16 +135,16 @@ fun FeaturedHeroCarousel(
                         // Year Badge
                         Text(
                             text = "${movie.year}",
-                            style = CinevexTypography.LabelSmall,
-                            color = CinevexColors.TextSecondary
+                            style = CCloudTypography.LabelSmall,
+                            color = CCloudColors.TextSecondary
                         )
 
                         // Genres summary
                         if (movie.genres.isNotEmpty()) {
                             Text(
                                 text = "•  " + movie.genres.take(2).joinToString(", ") { it.title },
-                                style = CinevexTypography.LabelSmall,
-                                color = CinevexColors.TextSecondary,
+                                style = CCloudTypography.LabelSmall,
+                                color = CCloudColors.TextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
@@ -156,7 +156,7 @@ fun FeaturedHeroCarousel(
                     // Title
                     Text(
                         text = movie.title,
-                        style = CinevexTypography.HeroTitle,
+                        style = CCloudTypography.HeroTitle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -167,7 +167,7 @@ fun FeaturedHeroCarousel(
                     if (movie.description.isNotBlank()) {
                         Text(
                             text = movie.description,
-                            style = CinevexTypography.BodyMedium,
+                            style = CCloudTypography.BodyMedium,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             lineHeight = 18.sp
@@ -201,7 +201,7 @@ fun FeaturedHeroCarousel(
                                 Icon(
                                     imageVector = Icons.Default.Info,
                                     contentDescription = null,
-                                    tint = CinevexColors.TextPrimary,
+                                    tint = CCloudColors.TextPrimary,
                                     modifier = Modifier.size(16.dp)
                                 )
                             },
@@ -226,7 +226,7 @@ fun FeaturedHeroCarousel(
                         .size(if (isSelected) 8.dp else 6.dp)
                         .clip(CircleShape)
                         .background(
-                            if (isSelected) CinevexColors.AccentRed
+                            if (isSelected) CCloudColors.AccentRed
                             else Color.White.copy(alpha = 0.3f)
                         )
                 )

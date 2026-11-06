@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.farshidrezaei.ccloudplus.core.theme.CinevexColors
-import com.farshidrezaei.ccloudplus.core.theme.CinevexTypography
+import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.data.model.AdvancedFilter
 import com.farshidrezaei.ccloudplus.data.model.AudioType
 import com.farshidrezaei.ccloudplus.data.model.ReleaseEra
@@ -33,7 +33,7 @@ fun AdvancedFilterSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = CinevexColors.SurfaceDark,
+        containerColor = CCloudColors.SurfaceDark,
         scrimColor = Color.Black.copy(alpha = 0.75f),
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         dragHandle = {
@@ -60,12 +60,12 @@ fun AdvancedFilterSheet(
             ) {
                 Text(
                     text = "فیلتر پیشرفته محتوا",
-                    style = CinevexTypography.TitleLarge
+                    style = CCloudTypography.TitleLarge
                 )
                 Text(
                     text = "بازنشانی",
-                    style = CinevexTypography.LabelSmall,
-                    color = CinevexColors.AccentRed,
+                    style = CCloudTypography.LabelSmall,
+                    color = CCloudColors.AccentRed,
                     modifier = Modifier.clickable {
                         minImdb = 0f
                         selectedEra = ReleaseEra.ALL
@@ -79,7 +79,7 @@ fun AdvancedFilterSheet(
             // IMDb Slider
             Text(
                 text = "حداقل امتیاز IMDb: ${if (minImdb > 0f) String.format("%.1f+", minImdb) else "همه"}",
-                style = CinevexTypography.TitleMedium
+                style = CCloudTypography.TitleMedium
             )
             Spacer(modifier = Modifier.height(6.dp))
             Slider(
@@ -88,8 +88,8 @@ fun AdvancedFilterSheet(
                 valueRange = 0f..9f,
                 steps = 17, // increments of 0.5
                 colors = SliderDefaults.colors(
-                    thumbColor = CinevexColors.AccentRed,
-                    activeTrackColor = CinevexColors.AccentRed,
+                    thumbColor = CCloudColors.AccentRed,
+                    activeTrackColor = CCloudColors.AccentRed,
                     inactiveTrackColor = Color.White.copy(alpha = 0.15f)
                 )
             )
@@ -99,7 +99,7 @@ fun AdvancedFilterSheet(
             // Release Era
             Text(
                 text = "دوره انتشار",
-                style = CinevexTypography.TitleMedium
+                style = CCloudTypography.TitleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(
@@ -111,12 +111,12 @@ fun AdvancedFilterSheet(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isSelected) CinevexColors.AccentRed
-                                else CinevexColors.GlassSurfaceElevated
+                                if (isSelected) CCloudColors.AccentRed
+                                else CCloudColors.GlassSurfaceElevated
                             )
                             .border(
                                 1.dp,
-                                if (isSelected) CinevexColors.AccentRed else CinevexColors.GlassBorder,
+                                if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassBorder,
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedEra = era }
@@ -124,8 +124,8 @@ fun AdvancedFilterSheet(
                     ) {
                         Text(
                             text = era.titleFa,
-                            style = CinevexTypography.LabelSmall,
-                            color = if (isSelected) Color.White else CinevexColors.TextSecondary
+                            style = CCloudTypography.LabelSmall,
+                            color = if (isSelected) Color.White else CCloudColors.TextSecondary
                         )
                     }
                 }
@@ -136,7 +136,7 @@ fun AdvancedFilterSheet(
             // Audio & Dubbing
             Text(
                 text = "صوت و دوبله",
-                style = CinevexTypography.TitleMedium
+                style = CCloudTypography.TitleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -148,12 +148,12 @@ fun AdvancedFilterSheet(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (isSelected) CinevexColors.AccentRed
-                                else CinevexColors.GlassSurfaceElevated
+                                if (isSelected) CCloudColors.AccentRed
+                                else CCloudColors.GlassSurfaceElevated
                             )
                             .border(
                                 1.dp,
-                                if (isSelected) CinevexColors.AccentRed else CinevexColors.GlassBorder,
+                                if (isSelected) CCloudColors.AccentRed else CCloudColors.GlassBorder,
                                 RoundedCornerShape(10.dp)
                             )
                             .clickable { selectedAudio = audio }
@@ -161,8 +161,8 @@ fun AdvancedFilterSheet(
                     ) {
                         Text(
                             text = audio.titleFa,
-                            style = CinevexTypography.LabelSmall,
-                            color = if (isSelected) Color.White else CinevexColors.TextSecondary
+                            style = CCloudTypography.LabelSmall,
+                            color = if (isSelected) Color.White else CCloudColors.TextSecondary
                         )
                     }
                 }

@@ -39,6 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.farshidrezaei.ccloudplus.core.theme.CCloudColors
+import com.farshidrezaei.ccloudplus.core.theme.CCloudTheme
 import com.farshidrezaei.ccloudplus.core.theme.CCloudTypography
 import com.farshidrezaei.ccloudplus.core.utils.DeviceUtils
 import com.farshidrezaei.ccloudplus.core.utils.StorageUtils
@@ -85,7 +86,7 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CCloudColors.BackgroundOled)
+            .background(CCloudTheme.colors.background)
     ) {
         when {
             isLoading && movies.isEmpty() && series.isEmpty() -> {
@@ -281,22 +282,31 @@ private fun HomeTopBar(
         // CCloud+ Signature Logo in Center
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(
-                text = "CCLOUD",
-                style = CCloudTypography.TitleMedium.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.sp
-                ),
-                color = CCloudColors.TextPrimary
+            Image(
+                painter = painterResource(com.farshidrezaei.ccloudplus.R.drawable.app_logo),
+                contentDescription = "CCloud+ Logo",
+                modifier = Modifier.size(28.dp)
             )
-            Text(
-                text = "+",
-                style = CCloudTypography.TitleMedium.copy(
-                    fontWeight = FontWeight.Black
-                ),
-                color = CCloudColors.AccentRed
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "CCLOUD",
+                    style = CCloudTypography.TitleMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    ),
+                    color = CCloudTheme.colors.textPrimary
+                )
+                Text(
+                    text = "+",
+                    style = CCloudTypography.TitleMedium.copy(
+                        fontWeight = FontWeight.Black
+                    ),
+                    color = CCloudColors.AccentRed
+                )
+            }
+        }
             )
         }
 
